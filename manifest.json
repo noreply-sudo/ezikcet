@@ -1,7 +1,7 @@
 {
-  "name": "EziKCET Support",
+  "name": "EziKCET",
   "short_name": "EziKCET",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
