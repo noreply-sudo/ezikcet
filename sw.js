@@ -1,22 +1,21 @@
 const CACHE_NAME = 'ezikcet-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon.png'
-  // Add your other html files here like '/physics.html', etc.
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.png'
 ];
 
-// Install Event
+// 1. Install Service Worker & Cache Files
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
 
-// Fetch Event (Offline Capability)
+// 2. Serve Cached Files (Offline Support)
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((response) => {
