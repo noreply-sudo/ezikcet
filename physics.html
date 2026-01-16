@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Physics Master - KCET</title>
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="theme-color" content="#007bff">
+    <style>
+        /* --- CORE THEME --- */
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --accent: #6610f2;
+            --bg: #f4f7f6;
+            --text: #2c3e50;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* --- HEADER --- */
+        .header {
+            width: 100%; max-width: 600px; padding: 15px 20px; box-sizing: border-box;
+            display: flex; align-items: center; background: rgba(255,255,255,0.95); 
+            border-bottom: 1px solid #e1e4e8; z-index: 20; flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+        .back-btn { 
+            text-decoration: none; font-size: 1rem; color: var(--primary); 
+            font-weight: 700; margin-right: 15px; display: flex; align-items: center;
+            background: #eef7ff; padding: 8px 12px; border-radius: 8px;
+        }
+        h1 { margin: 0; font-size: 1.3rem; color: var(--text); font-weight: 800; letter-spacing: -0.5px; }
+
+        /* --- SCROLLABLE LIST --- */
+        .scroll-area {
+            width: 100%; max-width: 600px; flex: 1; overflow-y: auto;
+            padding: 20px; box-sizing: border-box; padding-bottom: 80px;
+            scroll-behavior: smooth;
+        }
+
+        /* --- TOPIC CARDS --- */
+        .section-header {
+            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: #888; font-weight: 700; margin: 25px 0 10px 5px;
+        }
+
+        .topic-card {
+            background: var(--card-bg); border-radius: 16px;
+            padding: 22px; margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; border: 1px solid white;
+        }
+        .topic-card:active { transform: scale(0.97); }
+        
+        /* Decorative Strip */
+        .topic-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+        }
+
+        /* Class 12 Specific Strip Color */
+        .topic-card.class-12::before { background: linear-gradient(180deg, #ff416c, #ff4b2b); }
+
+        .topic-info { flex: 1; margin-left: 12px; }
+        .topic-title { font-weight: 800; font-size: 1.15rem; margin-bottom: 6px; display: block; color: var(--text); }
+        .topic-subtitle { font-size: 0.9rem; color: #6c757d; font-weight: 500; line-height: 1.3; }
+        
+        .card-icon {
+            width: 40px; height: 40px; background: #f0f2f5; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+            color: var(--primary); margin-left: 10px;
+        }
+
+        /* --- READER OVERLAY --- */
+        #reader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 100; display: none;
+            flex-direction: column; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #reader-overlay.visible { opacity: 1; }
+
+        .reader-header {
+            padding: 15px 20px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; flex-shrink: 0; z-index: 101;
+        }
+        .close-btn { 
+            background: #f8f9fa; border: none; width: 40px; height: 40px; 
+            border-radius: 50%; font-size: 1.5rem; cursor: pointer; color: #333;
+            display: flex; justify-content: center; align-items: center;
+            transition: background 0.2s;
+        }
+        .close-btn:active { background: #e2e6ea; }
+
+        .reader-content {
+            flex: 1; overflow-y: auto; padding: 25px; line-height: 1.8;
+            max-width: 700px; margin: 0 auto; width: 100%; box-sizing: border-box;
+            background: #fff; padding-bottom: 100px;
+        }
+
+        /* --- CONTENT STYLING (THE FUN PART) --- */
+        
+        /* Typography */
+        .reader-content h2 { 
+            color: var(--primary); font-size: 2rem; margin-top: 10px; margin-bottom: 20px;
+            font-weight: 900; letter-spacing: -1px; line-height: 1.1;
+        }
+        
+        .reader-content h3 { 
+            margin-top: 40px; margin-bottom: 15px; font-size: 1.3rem; 
+            color: #343a40; font-weight: 700; position: relative; padding-left: 15px;
+        }
+        .reader-content h3::before {
+            content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px;
+            background: var(--accent); border-radius: 2px;
+        }
+
+        .reader-content p { color: #495057; font-size: 1.05rem; margin-bottom: 15px; }
+
+        /* Graphic Elements */
+        
+        /* 1. The Fun Intro Box */
+        .fun-intro { 
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            padding: 25px; border-radius: 16px; margin-bottom: 30px; 
+            border: 1px solid #e1e4e8; position: relative;
+        }
+        .fun-intro::after {
+            content: '👋'; position: absolute; top: -15px; right: 20px; font-size: 2rem;
+            background: white; padding: 5px; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .fun-intro em { font-style: normal; font-weight: 500; color: #555; display: block; }
+
+        /* 2. Blueprint Formula Box (Dark Mode) */
+        .formula-box {
+            background: #1e1e2e; color: #a6accd;
+            padding: 25px; border-radius: 12px; font-family: 'Courier New', monospace;
+            margin: 25px 0; position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            border: 1px solid #303040;
+        }
+        .formula-box strong { color: #82aaff; display: block; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .formula-box em { color: #c3e88d; font-style: normal; font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 5px; }
+        .formula-box::before {
+            content: 'FORMULA BLUEPRINT'; position: absolute; top: 10px; right: 10px;
+            font-size: 0.6rem; color: #444; letter-spacing: 2px; font-weight: bold;
+        }
+
+        /* 3. Sticky Note Mnemonic */
+        .mnemonic-box {
+            background: #fff9c4; color: #5d4037;
+            padding: 20px 25px; border-radius: 2px 2px 20px 2px;
+            margin: 30px 10px; position: relative;
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.1);
+            transform: rotate(-1deg);
+            border-top: 1px solid #fffde7;
+        }
+        .mnemonic-title { 
+            font-weight: 900; text-transform: uppercase; font-size: 0.9rem; 
+            letter-spacing: 1px; margin-bottom: 10px; display: block; color: #fbc02d; text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+        }
+        .mnemonic-box::after {
+            content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            width: 30%; height: 20px; background: rgba(0,0,0,0.05); border-radius: 4px;
+        }
+
+        /* 4. Pro Tip Achievement */
+        .pro-tip {
+            background: #e3f2fd; color: #0d47a1;
+            padding: 20px; border-radius: 12px; margin-top: 35px;
+            border-left: 5px solid #2196f3; display: flex; align-items: start;
+        }
+        .tip-icon { font-size: 1.5rem; margin-right: 15px; }
+        .tip-content strong { display: block; margin-bottom: 5px; font-weight: 800; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+
+        /* Lists */
+        ul { padding-left: 20px; list-style-type: none; }
+        li { margin-bottom: 10px; position: relative; padding-left: 25px; }
+        li::before {
+            content: '•'; color: var(--primary); font-weight: bold; font-size: 1.5rem;
+            position: absolute; left: 0; top: -5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="back-btn">
+            <span style="font-size:1.2rem; margin-right:5px;">←</span> Home
+        </a>
+        <h1 style="margin-left: auto;">Physics Zone</h1>
+    </div>
+
+    <div class="scroll-area" id="topic-list">
+        </div>
+
+    <div id="reader-overlay">
+        <div class="reader-header">
+            <span style="font-weight:700; color:var(--primary); font-size: 0.9rem; text-transform:uppercase; letter-spacing:1px;" id="reader-category">Class 11</span>
+            <button class="close-btn" onclick="closeReader()">×</button>
+        </div>
+        <div class="reader-content">
+            <h2 id="reader-title">Topic Title</h2>
+            <div id="reader-body">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA REPOSITORY (ALL 28 TOPICS) ---
+        const physicsData = [
+            // === CLASS 11 ===
+            {
+                class: "11",
+                title: "Units & Measurements",
+                subtitle: "Dimensions, Errors & The 7 Infinity Stones",
+                icon: "📏",
+                content: `
+                    <div class="fun-intro"><em>Physics is just opinion without measurement.</em> If you can't put a number on it, you don't know it! Let's standardize the universe.</div>
+                    
+                    <h3>1. The 7 Fundamental Units</h3>
+                    <p>Memorize these. They are the LEGO blocks of the universe.</p>
+                    <ul>
+                        <li><strong>Length:</strong> Meter (m)</li>
+                        <li><strong>Mass:</strong> Kilogram (kg)</li>
+                        <li><strong>Time:</strong> Second (s)</li>
+                        <li><strong>Electric Current:</strong> Ampere (A)</li>
+                        <li><strong>Temperature:</strong> Kelvin (K)</li>
+                        <li><strong>Amount of Substance:</strong> Mole (mol)</li>
+                        <li><strong>Luminous Intensity:</strong> Candela (cd)</li>
+                    </ul>
+
+                    <h3>2. Dimensional Analysis</h3>
+                    <p>The "Grammar Check" of Physics. You cannot add Apples ($L$) to Oranges ($T$).</p>
+                    <div class="formula-box">
+                        <strong>Homogeneity Principle</strong>
+                        <em>If A = B + C, then [A] = [B] = [C]</em>
+                        <strong>Common Dimensions</strong>
+                        <em>Force = [MLT⁻²]</em>
+                        <em>Energy = [ML²T⁻²]</em>
+                        <em>Power = [ML²T⁻³]</em>
+                    </div>
+
+                    <h3>3. Errors in Measurement</h3>
+                    <p>We are humans; we mess up. We quantify that mess-up.</p>
+                    <div class="formula-box">
+                        <strong>Error Propagation</strong>
+                        <em>If Z = A × B or A / B: <br> ΔZ/Z = ΔA/A + ΔB/B</em>
+                        <em>If Z = Aⁿ: <br> ΔZ/Z = n(ΔA/A)</em>
+                    </div>
+
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Mnemonic: LMT-AK-molcd</span>
+                        L.M.T (Like "Limit") + A.K (Current/Temp) + mol.cd
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                title: "Motion in a Straight Line",
+                subtitle: "1D Kinematics & Graph Hacks",
+                icon: "🏎️",
+                content: `
+                    <div class="fun-intro"><em>Welcome to the drag strip.</em> In this dimension, you can only go forward or backward. No turning allowed!</div>
+
+                    <h3>1. The Big 3 Equations</h3>
+                    <p>WARNING: These only work when <strong>Acceleration is Constant</strong> (like gravity).</p>
+                    <div class="formula-box">
+                        <strong>Velocity-Time</strong>
+                        <em>v = u + at</em>
+                        <strong>Displacement-Time</strong>
+                        <em>x = ut + ½at²</em>
+                        <strong>Velocity-Displacement</strong>
+                        <em>v² = u² + 2ax</em>
+                    </div>
+
+                    <h3>2. Graph Cheatsheet 📈</h3>
+                    <ul>
+                        <li><strong>Slope of x-t:</strong> Velocity</li>
+                        <li><strong>Slope of v-t:</strong> Acceleration</li>
+                        <li><strong>Area under v-t:</strong> Displacement</li>
+                        <li><strong>Area under a-t:</strong> Change in Velocity</li>
+                    </ul>
+
+                    <h3>3. Relative Velocity</h3>
+                    <p>If two cars crash head-on, it hurts more because their relative velocity adds up!</p>
+                    <div class="formula-box">
+                        <strong>Relative Velocity</strong>
+                        <em>V_ab = V_a - V_b</em>
+                        <br>Same Dir: Subtract | Opp Dir: Add
+                    </div>
+
+                    <div class="pro-tip">
+                        <div class="tip-icon">🛑</div>
+                        <div class="tip-content">
+                            <strong>Stopping Distance Hack</strong>
+                            Stopping distance is proportional to $v^2$. If you double your speed, your braking distance becomes 4 times longer!
+                        </div>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                title: "Motion in a Plane",
+                subtitle: "Vectors, Projectiles & Circular Motion",
+                icon: "✈️",
+                content: `
+                    <div class="fun-intro"><em>Now we can turn!</em> This is 2D motion. It's essentially two 1D motions happening at the same time (X and Y axis).</div>
+
+                    <h3>1. Vectors: The Arrows</h3>
+                    <ul>
+                        <li><strong>Dot Product (Scalar):</strong> $A \cdot B = AB \cos\theta$ (Work)</li>
+                        <li><strong>Cross Product (Vector):</strong> $A \times B = AB \sin\theta$ (Torque)</li>
+                    </ul>
+
+                    <h3>2. Projectile Motion 🚀</h3>
+                    <p>The horizontal speed ($u \cos\theta$) NEVER changes because gravity only acts downwards.</p>
+                    <div class="formula-box">
+                        <strong>Time of Flight</strong>
+                        <em>T = 2u sinθ / g</em>
+                        <strong>Max Height</strong>
+                        <em>H = u² sin²θ / 2g</em>
+                        <strong>Range</strong>
+                        <em>R = u² sin2θ / g</em>
+                    </div>
+
+                    <h3>3. Uniform Circular Motion</h3>
+                    <p>Even if speed is constant, velocity changes (direction changes). This requires a force!</p>
+                    <div class="formula-box">
+                        <strong>Centripetal Accel</strong>
+                        <em>a_c = v² / r</em>
+                    </div>
+
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">The "2" Rule</span>
+                        T has 2 on top ($2u$). H has 2 on bottom ($2g$). R has 2 inside angle ($2\theta$).
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                title: "Laws of Motion",
+                subtitle: "Newton's Trinity, Friction & Banking",
+                icon: "🍎",
+                content: `
+                    <div class="fun-intro"><em>Isaac Newton:</em> The man who invented calculus during a pandemic just to explain why apples fall. Legend.</div>
+
+                    <h3>1. The Three Commandments</h3>
+                    <ul>
+                        <li><strong>1st Law (Inertia):</strong> Things are lazy. They keep doing what they are doing.</li>
+                        <li><strong>2nd Law (The Real Deal):</strong> $F = ma$ is a lie. The real law is $F = dp/dt$. Force is rate of change of momentum.</li>
+                        <li><strong>3rd Law (Karma):</strong> Action = -Reaction. Forces always come in pairs.</li>
+                    </ul>
+
+                    <h3>2. Friction: The Frenemy</h3>
+                    <p>It opposes relative motion. Static friction is "smart"—it adjusts itself up to a limit ($\mu N$).</p>
+                    <div class="formula-box">
+                        <strong>Friction Force</strong>
+                        <em>f = μN</em>
+                        (N is Normal Force)
+                    </div>
+
+                    <h3>3. Banking of Roads 🏎️</h3>
+                    <p>Why race tracks are tilted. It helps provide centripetal force without relying solely on friction.</p>
+                    <div class="formula-box">
+                        <strong>Banking Angle</strong>
+                        <em>tan θ = v² / rg</em>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                title: "Work, Energy & Power",
+                subtitle: "Collisions, Springs & The Theorem",
+                icon: "⚡",
+                content: `
+                    <div class="fun-intro"><em>Physics Definition of Work:</em> If you hold a 100kg barbell for 3 hours, you did ZERO work because displacement was zero. Don't tell your gym trainer.</div>
+
+                    <h3>1. Work-Energy Theorem</h3>
+                    <p>The MVP of mechanics problems. Net Work Done = Change in Kinetic Energy.</p>
+                    <div class="formula-box">
+                        <strong>The Theorem</strong>
+                        <em>W_net = ΔKE = K_f - K_i</em>
+                    </div>
+
+                    <h3>2. Collisions 🎱</h3>
+                    <ul>
+                        <li><strong>Elastic:</strong> Bouncing ball. Momentum AND KE conserved.</li>
+                        <li><strong>Inelastic:</strong> Car crash. Only Momentum conserved. KE lost to heat/sound.</li>
+                    </ul>
+
+                    <h3>3. Power</h3>
+                    <p>How fast you do work. It's a dot product!</p>
+                    <div class="formula-box">
+                        <strong>Power</strong>
+                        <em>P = F • v = Fv cosθ</em>
+                    </div>
+
+                    <div class="pro-tip">
+                        <div class="tip-icon">💡</div>
+                        <div class="tip-content">
+                            <strong>Zero Power?</strong>
+                            In circular motion, Force is perpendicular to Velocity ($90^\circ$). Since $\cos(90) = 0$, the magnetic force or gravity (in orbit) does ZERO work.
+                        </div>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                title: "Rotational Motion",
+                subtitle: "Torque, MOI & Angular Momentum",
+                icon: "🌪️",
+                content: `
+                    <div class="fun-intro"><em>Spin Class.</em> Everything linear has a rotational twin. Mass becomes MOI, Force becomes Torque.</div>
+
+                    <h3>1. The Dictionary</h3>
+                    <ul>
+                        <li><strong>Mass (m)</strong> → Moment of Inertia (I)</li>
+                        <li><strong>Force (F)</strong> → Torque ($\tau$)</li>
+                        <li><strong>Momentum (p)</strong> → Angular Momentum (L)</li>
+                    </ul>
+
+                    <h3>2. Moment of Inertia (I)</h3>
+                    <p>Resistance to rotation. Depends on mass distribution.</p>
+                    <div class="formula-box">
+                        <strong>Common MOIs</strong>
+                        <em>Ring: MR²</em>
+                        <em>Disc: MR²/2</em>
+                        <em>Solid Sphere: 2/5 MR²</em>
+                    </div>
+
+                    <h3>3. Conservation of Angular Momentum</h3>
+                    <p>If external Torque is zero, L is constant. ($I_1\omega_1 = I_2\omega_2$). This is why ice skaters spin faster when they pull arms in!</p>
+                `
+            },
+            {
+                class: "11",
+                title: "Gravitation",
+                subtitle: "Kepler, Satellites & Escape Velocity",
+                icon: "🌍",
+                content: `
+                    <div class="fun-intro"><em>The Weakest Force.</em> Gravity is incredibly weak. A tiny fridge magnet can defeat the gravity of the entire Earth!</div>
+
+                    <h3>1. Variation of 'g'</h3>
+                    <ul>
+                        <li><strong>Height (h):</strong> g decreases. $g(1 - 2h/R)$</li>
+                        <li><strong>Depth (d):</strong> g decreases. $g(1 - d/R)$</li>
+                        <li><strong>Center:</strong> g is Zero.</li>
+                    </ul>
+
+                    <h3>2. Escape Speed 🚀</h3>
+                    <p>Speed needed to leave Earth forever: 11.2 km/s.</p>
+                    <div class="formula-box">
+                        <strong>Escape Velocity</strong>
+                        <em>v_e = √(2gR)</em>
+                        <strong>Orbital Velocity</strong>
+                        <em>v_o = √(gR)</em>
+                    </div>
+
+                    <h3>3. Kepler's Laws</h3>
+                    <p>3rd Law is the favorite for exams: $T^2 \propto R^3$.</p>
+                `
+            },
+            {
+                class: "11",
+                title: "Mechanical Properties of Solids",
+                subtitle: "Stress, Strain & Modulus",
+                icon: "🧱",
+                content: `
+                    <div class="fun-intro"><em>Solids are Springs.</em> At the atomic level, atoms are connected by invisible springs. Hooke found this out.</div>
+
+                    <h3>1. Stress & Strain</h3>
+                    <p><strong>Stress:</strong> Force per unit Area (Pressure).<br><strong>Strain:</strong> Change in dimension / Original dimension.</p>
+
+                    <h3>2. Hooke's Law</h3>
+                    <p>Within elastic limit, Stress is proportional to Strain.</p>
+                    <div class="formula-box">
+                        <strong>Young's Modulus (Y)</strong>
+                        <em>Y = Stress / Strain</em>
+                    </div>
+
+                    <div class="pro-tip">
+                        <div class="tip-icon">🦾</div>
+                        <div class="tip-content">
+                            <strong>Steel vs Rubber</strong>
+                            Physics says Steel is MORE elastic than Rubber because it requires more force to deform it (Higher Young's Modulus).
+                        </div>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                title: "Mechanical Properties of Fluids",
+                subtitle: "Bernoulli, Pascal & Surface Tension",
+                icon: "💧",
+                content: `
+                    <div class="fun-intro"><em>Fluids rule the world.</em> From hydraulics to airplanes, understanding flow is a superpower.</div>
+
+                    <h3>1. Bernoulli's Principle ✈️</h3>
+                    <p>Conservation of Energy for flowing fluids. <strong>Fast air = Low Pressure.</strong> This is why planes fly.</p>
+                    <div class="formula-box">
+                        <strong>The Equation</strong>
+                        <em>P + ½ρv² + ρgh = Constant</em>
+                    </div>
+
+                    <h3>2. Surface Tension</h3>
+                    <p>Liquids want to minimize surface area. A sphere has the smallest area for a volume, hence raindrops are round.</p>
+
+                    <h3>3. Viscosity</h3>
+                    <p>Liquid friction. Honey has high viscosity; water has low.</p>
+                `
+            },
+            {
+                class: "11",
+                title: "Thermal Properties",
+                subtitle: "Heat, Calorimetry & Expansion",
+                icon: "🔥",
+                content: `
+                    <div class="fun-intro"><em>It's getting hot.</em> Heat is just energy in transit. Temperature is the average kinetic energy of molecules.</div>
+
+                    <h3>1. Thermal Expansion</h3>
+                    <p>Things expand when hot. $\Delta L = L \alpha \Delta T$.</p>
+                    <p><strong>Anomaly:</strong> Water contracts from 0°C to 4°C. This saves fish in winter!</p>
+
+                    <h3>2. Heat Transfer</h3>
+                    <ul>
+                        <li><strong>Conduction:</strong> Solids touching.</li>
+                        <li><strong>Convection:</strong> Fluids moving (Wind).</li>
+                        <li><strong>Radiation:</strong> Light (Sun to Earth). Fastest.</li>
+                    </ul>
+
+                    <h3>3. Newton's Law of Cooling</h3>
+                    <p>Rate of cooling $\propto$ Temp difference. Hot coffee cools faster initially.</p>
+                `
+            },
+            {
+                class: "11",
+                title: "Thermodynamics",
+                subtitle: "Laws, Engines & Entropy",
+                icon: "🚂",
+                content: `
+                    <div class="fun-intro"><em>Work from Heat.</em> The science that powered the industrial revolution.</div>
+
+                    <h3>1. The Laws</h3>
+                    <ul>
+                        <li><strong>0th Law:</strong> Defines Temp.</li>
+                        <li><strong>1st Law:</strong> Energy Conservation ($\Delta Q = \Delta U + \Delta W$).</li>
+                        <li><strong>2nd Law:</strong> Entropy increases. Heat flows Hot → Cold.</li>
+                    </ul>
+
+                    <h3>2. Processes</h3>
+                    <div class="formula-box">
+                        <strong>Isothermal</strong>
+                        <em>PV = Constant (T const)</em>
+                        <strong>Adiabatic</strong>
+                        <em>PV^γ = Constant (Q = 0)</em>
+                    </div>
+
+                    <h3>3. Carnot Engine</h3>
+                    <p>The most efficient theoretical engine. Efficiency depends only on Source/Sink temps.</p>
+                    <div class="formula-box">
+                        <strong>Efficiency (η)</strong>
+                        <em>η = 1 - T_sink / T_source</em>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                title: "Kinetic Theory",
+                subtitle: "Ideal Gas & Degrees of Freedom",
+                icon: "🎱",
+                content: `
+                    <div class="fun-intro"><em>Gas Billiards.</em> Imagine trillions of tiny balls bouncing perfectly elastically. That's a gas.</div>
+
+                    <h3>1. Ideal Gas Equation</h3>
+                    <div class="formula-box"><em>PV = nRT</em></div>
+
+                    <h3>2. Degrees of Freedom (f)</h3>
+                    <p>Ways to store energy.</p>
+                    <ul>
+                        <li><strong>Monoatomic (He):</strong> f = 3</li>
+                        <li><strong>Diatomic (O2):</strong> f = 5</li>
+                    </ul>
+
+                    <h3>3. V_rms Speed</h3>
+                    <p>Root Mean Square speed. $\sqrt{3RT/M}$. Lighter gases move faster!</p>
+                `
+            },
+            {
+                class: "11",
+                title: "Oscillations",
+                subtitle: "SHM, Pendulums & Springs",
+                icon: "🕰️",
+                content: `
+                    <div class="fun-intro"><em>Tick Tock.</em> Back and forth. The restoring force is always pulling you home.</div>
+
+                    <h3>1. Simple Harmonic Motion (SHM)</h3>
+                    <p>Condition: $a \propto -x$. Acceleration opposes displacement.</p>
+
+                    <h3>2. Time Periods</h3>
+                    <div class="formula-box">
+                        <strong>Pendulum</strong>
+                        <em>T = 2π √(L/g)</em>
+                        <strong>Spring</strong>
+                        <em>T = 2π √(m/k)</em>
+                    </div>
+
+                    <h3>3. Energy</h3>
+                    <p>Total energy is constant ($1/2 kA^2$). It swaps between Kinetic and Potential.</p>
+                `
+            },
+            {
+                class: "11",
+                title: "Waves",
+                subtitle: "Sound, Beats & Doppler",
+                icon: "🔊",
+                content: `
+                    <div class="fun-intro"><em>Energy without Matter.</em> The wave travels, the particles just vibe in place.</div>
+
+                    <h3>1. Sound vs Light</h3>
+                    <ul>
+                        <li><strong>Sound:</strong> Longitudinal (Pressure waves). Needs medium.</li>
+                        <li><strong>Light:</strong> Transverse. No medium needed.</li>
+                    </ul>
+
+                    <h3>2. Doppler Effect 🚑</h3>
+                    <p>Train coming: Pitch High (Freq Increases).<br>Train leaving: Pitch Low (Freq Decreases).</p>
+
+                    <h3>3. Standing Waves</h3>
+                    <p>Guitar strings. Open pipes (all harmonics). Closed pipes (odd harmonics only).</p>
+                `
+            },
+
+            // === CLASS 12 ===
+            
+            {
+                class: "12",
+                title: "Electric Charges & Fields",
+                subtitle: "Coulomb, Gauss & Dipoles",
+                icon: "⚡",
+                content: `
+                    <div class="fun-intro"><em>Static Shock.</em> Welcome to Class 12! We start with charges that are sitting still (Electrostatics).</div>
+
+                    <h3>1. Coulomb's Law</h3>
+                    <p>The "Gravity" of electricity. Like charges repel, opposites attract.</p>
+                    <div class="formula-box">
+                        <strong>Force</strong>
+                        <em>F = k q₁q₂ / r²</em>
+                        (k = 9 × 10⁹)
+                    </div>
+
+                    <h3>2. Electric Field Lines</h3>
+                    <p>Imaginary lines showing where a +ve charge would run. They NEVER cross each other.</p>
+
+                    <h3>3. Gauss's Law</h3>
+                    <p>The Cheat Code for calculating Fields. Total Flux = Charge Enclosed / $\epsilon_0$.</p>
+                    <div class="formula-box">
+                        <strong>Flux (Φ)</strong>
+                        <em>Φ = ∮ E⋅dA = q_in / ε₀</em>
+                    </div>
+
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Dipole Torque</span>
+                        PE = -pE cos(theta) ... "PE is Negative PEace"
+                    </div>
+                `
+            },
+            {
+                class: "12",
+                title: "Potential & Capacitance",
+                subtitle: "Voltage & Energy Storage",
+                icon: "🔋",
+                content: `
+                    <div class="fun-intro"><em>The Pressure.</em> Potential (Voltage) is electrical pressure. Capacitors are buckets that store charge.</div>
+
+                    <h3>1. Equipotential Surfaces</h3>
+                    <p>Surfaces where Voltage is same everywhere. Work done to move charge here is ZERO.</p>
+
+                    <h3>2. Capacitors</h3>
+                    <p>Devices to store energy in Electric Field. $C = Q/V$.</p>
+                    <div class="formula-box">
+                        <strong>Parallel Plate</strong>
+                        <em>C = ε₀A / d</em>
+                        <strong>Energy Stored</strong>
+                        <em>U = ½ CV²</em>
+                    </div>
+
+                    <h3>3. Grouping</h3>
+                    <ul>
+                        <li><strong>Series:</strong> $1/C = 1/C_1 + 1/C_2$ (Like resistors in parallel)</li>
+                        <li><strong>Parallel:</strong> $C = C_1 + C_2$ (Adds up!)</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                title: "Current Electricity",
+                subtitle: "Ohm, Drift & Kirchhoff",
+                icon: "🔌",
+                content: `
+                    <div class="fun-intro"><em>Flow State.</em> Charges finally start moving. But surprise: Electrons are incredibly slow!</div>
+
+                    <h3>1. Drift Velocity</h3>
+                    <p>Electrons bounce around. Their net speed is tiny (mm/s).</p>
+                    <div class="formula-box">
+                        <strong>Current</strong>
+                        <em>I = nAev_d</em>
+                        (n: density, A: area, v_d: drift vel)
+                    </div>
+
+                    <h3>2. Kirchhoff's Rules 🚦</h3>
+                    <ul>
+                        <li><strong>Junction Rule:</strong> Traffic In = Traffic Out (Conservation of Charge).</li>
+                        <li><strong>Loop Rule:</strong> Sum of Voltage drops = 0 (Conservation of Energy).</li>
+                    </ul>
+
+                    <h3>3. Wheatstone Bridge</h3>
+                    <p>The balanced condition: $R_1/R_2 = R_3/R_4$. No current flows in the middle galvanometer.</p>
+                `
+            },
+            {
+                class: "12",
+                title: "Moving Charges & Magnetism",
+                subtitle: "Biot-Savart, Ampere & Force",
+                icon: "🧲",
+                content: `
+                    <div class="fun-intro"><em>Spooky Action.</em> A moving electric charge creates a Magnetic Field. Electricity and Magnetism are siblings!</div>
+
+                    <h3>1. Right Hand Thumb Rule 👍</h3>
+                    <p>Current goes up? Field wraps around like your fingers. Essential gymnastics for exams.</p>
+
+                    <h3>2. Lorentz Force</h3>
+                    <p>Force on a moving charge in B-field.</p>
+                    <div class="formula-box">
+                        <strong>Magnetic Force</strong>
+                        <em>F = q(v × B) = qvB sinθ</em>
+                    </div>
+                    <p>If v is parallel to B ($0^\circ$), Force is ZERO.</p>
+
+                    <h3>3. Ampere's Circuital Law</h3>
+                    <p>The "Gauss Law" of Magnetism. $\oint B \cdot dl = \mu_0 I$.</p>
+                `
+            },
+            {
+                class: "12",
+                title: "Magnetism & Matter",
+                subtitle: "Dipoles & Magnetic Materials",
+                icon: "🧭",
+                content: `
+                    <div class="fun-intro"><em>Earth is a Magnet.</em> Why compasses point North. Also, materials have magnetic personalities.</div>
+
+                    <h3>1. Magnetic Materials</h3>
+                    <ul>
+                        <li><strong>Diamagnetic:</strong> Hates magnets. Repelled weakly. (Water, Gold).</li>
+                        <li><strong>Paramagnetic:</strong> Likes magnets a little. Attracted weakly. (Aluminum).</li>
+                        <li><strong>Ferromagnetic:</strong> Loves magnets. Attracted strongly. (Iron, Nickel).</li>
+                    </ul>
+
+                    <h3>2. Magnetic Dipole</h3>
+                    <p>Magnets always have 2 poles (N & S). Monopoles do not exist!</p>
+                `
+            },
+            {
+                class: "12",
+                title: "EMI (Induction)",
+                subtitle: "Faraday, Lenz & Flux",
+                icon: "🌀",
+                content: `
+                    <div class="fun-intro"><em>Magic Power.</em> Move a magnet near a wire, and electricity appears! This is how all world power is generated.</div>
+
+                    <h3>1. Magnetic Flux</h3>
+                    <p>Number of field lines passing through area. $\Phi = B \cdot A$.</p>
+
+                    <h3>2. Faraday's Law</h3>
+                    <p>Change flux → Get Voltage (EMF).</p>
+                    <div class="formula-box">
+                        <strong>Induced EMF</strong>
+                        <em>ε = - dΦ / dt</em>
+                    </div>
+
+                    <h3>3. Lenz's Law (Nature is Stubborn)</h3>
+                    <p>The negative sign means the induced current <strong>opposes</strong> the change. Nature hates change.</p>
+                `
+            },
+            {
+                class: "12",
+                title: "Alternating Current",
+                subtitle: "LCR, Resonance & Transformers",
+                icon: "🌊",
+                content: `
+                    <div class="fun-intro"><em>The War of Currents.</em> Tesla won. AC is what comes out of your wall socket because it oscillates.</div>
+
+                    <h3>1. RMS Value</h3>
+                    <p>AC voltage changes constantly. We use RMS (Root Mean Square) as the "effective" value.</p>
+                    <div class="formula-box"><em>V_rms = V_peak / √2</em></div>
+
+                    <h3>2. Impedance (Z)</h3>
+                    <p>Resistance in AC is complex. Resistors, Inductors, and Capacitors all fight current differently.</p>
+
+                    <h3>3. Resonance</h3>
+                    <p>When Inductive Reactance ($X_L$) cancels Capacitive Reactance ($X_C$). Current becomes Maximum!</p>
+                    <div class="formula-box">
+                        <strong>Resonant Freq</strong>
+                        <em>ω = 1 / √(LC)</em>
+                    </div>
+                `
+            },
+            {
+                class: "12",
+                title: "EM Waves",
+                subtitle: "Spectrum & Displacement Current",
+                icon: "📡",
+                content: `
+                    <div class="fun-intro"><em>Light is infinite.</em> Visible light is just a tiny slice of the massive EM spectrum.</div>
+
+                    <h3>1. The Spectrum (R M I V U X G)</h3>
+                    <p>Radio → Micro → Infra → Visible → UV → X-ray → Gamma.</p>
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Mnemonic</span>
+                        <strong>R</strong>ich <strong>M</strong>en <strong>I</strong>n <strong>V</strong>egas <strong>U</strong>se <strong>X</strong>pensive <strong>G</strong>adgets.
+                    </div>
+
+                    <h3>2. Displacement Current</h3>
+                    <p>Maxwell fixed Ampere's law. Changing Electric fields also produce Magnetic fields!</p>
+                `
+            },
+            {
+                class: "12",
+                title: "Ray Optics",
+                subtitle: "Lenses, Mirrors & Prisms",
+                icon: "🕶️",
+                content: `
+                    <div class="fun-intro"><em>Bending Light.</em> Light travels straight until it hits glass or water.</div>
+
+                    <h3>1. Refraction (Snell's Law)</h3>
+                    <p>$n_1 \sin i = n_2 \sin r$. Light bends TOWARDS normal in denser medium.</p>
+
+                    <h3>2. Total Internal Reflection (TIR)</h3>
+                    <p>If light tries to leave a dense medium at a steep angle, it gets trapped inside. Principle of Fiber Optics and Diamonds sparkling.</p>
+
+                    <h3>3. Lens Maker's Formula</h3>
+                    <div class="formula-box">
+                        <em>1/f = (n-1)(1/R₁ - 1/R₂)</em>
+                    </div>
+                `
+            },
+            {
+                class: "12",
+                title: "Wave Optics",
+                subtitle: "Interference & Diffraction",
+                icon: "🌈",
+                content: `
+                    <div class="fun-intro"><em>Light is a Wave.</em> It bends around corners (Diffraction) and mixes to form patterns (Interference).</div>
+
+                    <h3>1. Young's Double Slit (YDSE)</h3>
+                    <p>Proved light is a wave. Bright fringes (Constructive) and Dark fringes (Destructive).</p>
+                    <div class="formula-box">
+                        <strong>Fringe Width (β)</strong>
+                        <em>β = λD / d</em>
+                    </div>
+
+                    <h3>2. Diffraction</h3>
+                    <p>Bending of light around obstacles. Limit of resolution for telescopes.</p>
+                `
+            },
+            {
+                class: "12",
+                title: "Dual Nature of Matter",
+                subtitle: "Photoelectric Effect & Einstein",
+                icon: "🌗",
+                content: `
+                    <div class="fun-intro"><em>Identity Crisis.</em> Is light a particle or a wave? Answer: Yes.</div>
+
+                    <h3>1. Photoelectric Effect</h3>
+                    <p>Light hitting metal knocks out electrons. Proved Light is made of packets called <strong>Photons</strong>. Einstein won Nobel for this (not Relativity!).</p>
+                    <div class="formula-box">
+                        <strong>Einstein's Eq</strong>
+                        <em>K_max = hν - Φ</em>
+                        (Energy = Photon - WorkFunction)
+                    </div>
+
+                    <h3>2. De-Broglie Wavelength</h3>
+                    <p>Matter is also a wave. You have a wavelength (it's just super tiny).</p>
+                    <div class="formula-box"><em>λ = h / p = h / mv</em></div>
+                `
+            },
+            {
+                class: "12",
+                title: "Atoms",
+                subtitle: "Bohr Model & Spectra",
+                icon: "⚛️",
+                content: `
+                    <div class="fun-intro"><em>Solar System Model.</em> Bohr said electrons orbit nucleus in fixed paths.</div>
+
+                    <h3>1. Bohr's Postulates</h3>
+                    <ul>
+                        <li>Electrons only orbit where Angular Momentum $L = nh/2\pi$.</li>
+                        <li>They don't radiate energy in these stable orbits.</li>
+                    </ul>
+
+                    <h3>2. Hydrogen Spectrum</h3>
+                    <p>Jumping electrons release light.</p>
+                    <div class="formula-box">
+                        <strong>Rydberg Formula</strong>
+                        <em>1/λ = R(1/n₁² - 1/n₂²)</em>
+                    </div>
+                    <p>Lyman (UV), Balmer (Visible), Paschen (IR).</p>
+                `
+            },
+            {
+                class: "12",
+                title: "Nuclei",
+                subtitle: "Binding Energy & Fission",
+                icon: "☢️",
+                content: `
+                    <div class="fun-intro"><em>The Dense Core.</em> 99.9% of mass is in the nucleus. It packs a punch.</div>
+
+                    <h3>1. Mass Defect</h3>
+                    <p>Mass of nucleus < Sum of protons+neutrons. The missing mass turned into Binding Energy ($E=mc^2$).</p>
+
+                    <h3>2. Fission vs Fusion</h3>
+                    <ul>
+                        <li><strong>Fission:</strong> Splitting heavy nucleus (Nuclear Power Plants).</li>
+                        <li><strong>Fusion:</strong> Combining light nuclei (The Sun). Hard to do on Earth.</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                title: "Semiconductors",
+                subtitle: "Diodes, Logic Gates & Silicon",
+                icon: "💻",
+                content: `
+                    <div class="fun-intro"><em>The Digital Age.</em> We can control electricity now. Silicon is the hero.</div>
+
+                    <h3>1. PN Junction Diode</h3>
+                    <p>A one-way street for current.</p>
+                    <ul>
+                        <li><strong>Forward Bias:</strong> Conducts Current.</li>
+                        <li><strong>Reverse Bias:</strong> Blocks Current.</li>
+                    </ul>
+
+                    <h3>2. Rectifiers</h3>
+                    <p>Convert AC to DC. (Half wave / Full wave).</p>
+
+                    <h3>3. Optoelectronics</h3>
+                    <ul>
+                        <li><strong>LED:</strong> Emits light when forward biased.</li>
+                        <li><strong>Solar Cell:</strong> Generates voltage from light (No bias).</li>
+                        <li><strong>Zener Diode:</strong> Voltage regulator (works in reverse breakdown).</li>
+                    </ul>
+                `
+            }
+        ];
+
+        // --- 2. APP LOGIC ---
+        
+        const listContainer = document.getElementById('topic-list');
+        const reader = document.getElementById('reader-overlay');
+        const readerTitle = document.getElementById('reader-title');
+        const readerBody = document.getElementById('reader-body');
+        const readerCat = document.getElementById('reader-category');
+
+        // Initial Render
+        function init() {
+            // Group by Class for neatness
+            let currentClass = "";
+            
+            physicsData.forEach((topic, index) => {
+                // Add Section Header if class changes
+                if(topic.class !== currentClass) {
+                    const header = document.createElement('div');
+                    header.className = 'section-header';
+                    header.innerText = `Class ${topic.class} Syllabus`;
+                    listContainer.appendChild(header);
+                    currentClass = topic.class;
+                }
+
+                const card = document.createElement('div');
+                card.className = `topic-card class-${topic.class}`;
+                card.innerHTML = `
+                    <div class="topic-info">
+                        <span class="topic-title">${topic.title}</span>
+                        <span class="topic-subtitle">${topic.subtitle}</span>
+                    </div>
+                    <div class="card-icon">${topic.icon}</div>
+                `;
+                card.onclick = () => openReader(index);
+                listContainer.appendChild(card);
+            });
+        }
+
+        function openReader(index) {
+            const data = physicsData[index];
+            readerTitle.innerHTML = data.title;
+            readerCat.innerText = `Class ${data.class} • ${data.subtitle}`;
+            readerBody.innerHTML = data.content;
+            
+            reader.style.display = 'flex';
+            // Small timeout for fade-in effect
+            setTimeout(() => {
+                reader.classList.add('visible');
+            }, 10);
+        }
+
+        function closeReader() {
+            reader.classList.remove('visible');
+            setTimeout(() => {
+                reader.style.display = 'none';
+            }, 300);
+        }
+
+        // Run
+        init();
+
+        // Check Login
+        if (!localStorage.getItem('kcet_user')) { window.location.href = 'index.html'; }
+
+    </script>
+</body>
+</html>

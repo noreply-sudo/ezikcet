@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chemistry Master - KCET</title>
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="theme-color" content="#6f42c1">
+    <style>
+        /* --- CORE THEME (PURPLE/ALCHEMIST VIBE) --- */
+        :root {
+            --primary: #6f42c1;       /* Purple */
+            --primary-dark: #563d7c;
+            --accent: #e83e8c;        /* Pink for Reactions */
+            --bg: #f8f9fa;
+            --text: #212529;
+            --card-bg: #ffffff;
+            --chem-blue: #0dcaf0;     /* Cyan for Physical Chem */
+            --chem-green: #20c997;    /* Teal for Organic */
+            --chem-orange: #fd7e14;   /* Orange for Inorganic */
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            width: 100%; max-width: 600px; padding: 15px 20px; box-sizing: border-box;
+            display: flex; align-items: center; background: rgba(255,255,255,0.95); 
+            border-bottom: 1px solid #e9ecef; z-index: 20; flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+        .back-btn { 
+            text-decoration: none; font-size: 1rem; color: var(--primary); 
+            font-weight: 700; margin-right: 15px; display: flex; align-items: center;
+            background: #f3e5f5; padding: 8px 12px; border-radius: 8px;
+        }
+        h1 { margin: 0; font-size: 1.3rem; color: var(--text); font-weight: 800; letter-spacing: -0.5px; }
+
+        /* --- SCROLLABLE LIST --- */
+        .scroll-area {
+            width: 100%; max-width: 600px; flex: 1; overflow-y: auto;
+            padding: 20px; box-sizing: border-box; padding-bottom: 80px;
+            scroll-behavior: smooth;
+        }
+
+        /* --- SECTION HEADERS --- */
+        .section-header {
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: #6c757d; font-weight: 800; margin: 30px 0 15px 5px;
+            display: flex; align-items: center;
+        }
+        .section-header::after { content:''; flex:1; height:1px; background:#dee2e6; margin-left:15px; }
+
+        /* --- TOPIC CARDS --- */
+        .topic-card {
+            background: var(--card-bg); border-radius: 16px;
+            padding: 22px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.05); cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; border: 1px solid white;
+        }
+        .topic-card:active { transform: scale(0.97); }
+        
+        /* Decorative Strip */
+        .topic-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+        }
+        /* Class 12 Variation */
+        .topic-card.class-12::before { background: linear-gradient(180deg, var(--chem-blue), var(--chem-green)); }
+
+        .topic-info { flex: 1; margin-left: 12px; }
+        .topic-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 6px; display: block; color: var(--text); }
+        .topic-subtitle { font-size: 0.85rem; color: #6c757d; font-weight: 500; line-height: 1.3; }
+        
+        .topic-tag {
+            font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; font-weight: bold;
+            text-transform: uppercase; margin-top: 5px; display: inline-block;
+        }
+        .tag-physical { background: #e0f7fa; color: #006064; }
+        .tag-organic { background: #e8f5e9; color: #1b5e20; }
+        .tag-inorganic { background: #fff3e0; color: #e65100; }
+
+        /* --- READER OVERLAY --- */
+        #reader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 100; display: none;
+            flex-direction: column; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #reader-overlay.visible { opacity: 1; }
+
+        .reader-header {
+            padding: 15px 20px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; flex-shrink: 0; z-index: 101;
+        }
+        .close-btn { 
+            background: #f8f9fa; border: none; width: 40px; height: 40px; 
+            border-radius: 50%; font-size: 1.5rem; cursor: pointer; color: #333;
+            display: flex; justify-content: center; align-items: center;
+            transition: background 0.2s;
+        }
+        .close-btn:active { background: #e2e6ea; }
+
+        .reader-content {
+            flex: 1; overflow-y: auto; padding: 25px; line-height: 1.8;
+            max-width: 700px; margin: 0 auto; width: 100%; box-sizing: border-box;
+            background: #fff; padding-bottom: 100px;
+        }
+
+        /* --- CONTENT STYLING --- */
+        
+        .reader-content h2 { 
+            color: var(--primary); font-size: 2rem; margin-top: 10px; margin-bottom: 20px;
+            font-weight: 900; letter-spacing: -1px; line-height: 1.1;
+        }
+        
+        .reader-content h3 { 
+            margin-top: 40px; margin-bottom: 15px; font-size: 1.2rem; 
+            color: #343a40; font-weight: 700; position: relative; padding-left: 20px;
+        }
+        /* Chemical Bond Graphic for H3 */
+        .reader-content h3::before {
+            content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            width: 12px; height: 12px; border-radius: 50%; 
+            border: 3px solid var(--accent); box-sizing: border-box;
+        }
+
+        /* 1. Fun Intro Box */
+        .fun-intro { 
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe3ec 100%);
+            padding: 25px; border-radius: 16px; margin-bottom: 30px; 
+            border: 1px solid #f8bbd0; position: relative; color: #880e4f;
+        }
+        .fun-intro::after {
+            content: '🧪'; position: absolute; top: -15px; right: 20px; font-size: 2rem;
+            background: white; padding: 5px; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 2. Blueprint Formula Box (Physical Chem) */
+        .formula-box {
+            background: #212529; color: #61dafb;
+            padding: 25px; border-radius: 12px; font-family: 'Courier New', monospace;
+            margin: 25px 0; position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); border: 1px solid #343a40;
+        }
+        .formula-box strong { color: #e91e63; display: block; margin-bottom: 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .formula-box em { color: #ffffff; font-style: normal; font-weight: bold; font-size: 1.15rem; display: block; margin-bottom: 5px; }
+
+        /* 3. Reaction Mechanism Box (Organic Chem) */
+        .reaction-box {
+            background: #e8f5e9; border: 2px dashed #43a047;
+            padding: 20px; border-radius: 12px; margin: 25px 0;
+            color: #1b5e20;
+        }
+        .reaction-title { font-weight: 800; text-transform: uppercase; font-size: 0.85rem; color: #2e7d32; display: block; margin-bottom: 10px; }
+        .reaction-arrow { color: #f57c00; font-weight: bold; font-size: 1.2rem; }
+
+        /* 4. Sticky Note Mnemonic (Inorganic) */
+        .mnemonic-box {
+            background: #fff9c4; color: #5d4037;
+            padding: 20px 25px; border-radius: 2px 2px 20px 2px;
+            margin: 30px 10px; position: relative;
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.1); transform: rotate(1deg);
+        }
+        .mnemonic-title { 
+            font-weight: 900; text-transform: uppercase; font-size: 0.9rem; 
+            letter-spacing: 1px; margin-bottom: 10px; display: block; color: #fbc02d;
+        }
+
+        /* 5. Pro Tip Achievement */
+        .pro-tip {
+            background: #f3e5f5; color: #4a148c;
+            padding: 20px; border-radius: 12px; margin-top: 35px;
+            border-left: 5px solid #ab47bc; display: flex; align-items: start;
+        }
+        .tip-icon { font-size: 1.5rem; margin-right: 15px; }
+
+        /* Lists */
+        ul { padding-left: 20px; list-style-type: none; }
+        li { margin-bottom: 10px; position: relative; padding-left: 25px; }
+        li::before {
+            content: '⚗️'; color: var(--primary); font-size: 1rem;
+            position: absolute; left: 0; top: 0px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="back-btn">
+            <span style="font-size:1.2rem; margin-right:5px;">←</span> Home
+        </a>
+        <h1 style="margin-left: auto;">Chemistry Lab</h1>
+    </div>
+
+    <div class="scroll-area" id="topic-list">
+        </div>
+
+    <div id="reader-overlay">
+        <div class="reader-header">
+            <span style="font-weight:700; color:var(--primary); font-size: 0.9rem; text-transform:uppercase; letter-spacing:1px;" id="reader-category">Class 11</span>
+            <button class="close-btn" onclick="closeReader()">×</button>
+        </div>
+        <div class="reader-content">
+            <h2 id="reader-title">Topic Title</h2>
+            <div id="reader-body">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA REPOSITORY (19 TOPICS) ---
+        const chemistryData = [
+            
+            // === CLASS 11 (I PUC) ===
+            
+            {
+                class: "11",
+                type: "Physical",
+                title: "Basic Concepts",
+                subtitle: "Mole Concept & Stoichiometry",
+                content: `
+                    <div class="fun-intro"><em>The Baker's Dozen of Atoms.</em> Chemistry doesn't count atoms one by one; we count them in packs called Moles. 6.022 × 10²³ to be exact.</div>
+                    
+                    <h3>1. The Mole Concept</h3>
+                    <p>One mole is just a number (Avogadro's Number, $N_A$).</p>
+                    <div class="formula-box">
+                        <strong>Number of Moles (n)</strong>
+                        <em>n = Mass / Molar Mass</em>
+                        <em>n = Particles / N_A</em>
+                        <em>n = Volume (L) / 22.4 (at STP)</em>
+                    </div>
+
+                    <h3>2. Concentration Terms</h3>
+                    <p>How strong is your coffee (solution)?</p>
+                    <ul>
+                        <li><strong>Molarity (M):</strong> Moles / Liters of Solution. [Temp Dependent!]</li>
+                        <li><strong>Molality (m):</strong> Moles / Kg of Solvent. [Temp Independent - Better!]</li>
+                    </ul>
+
+                    <h3>3. Empirical Formula</h3>
+                    <p>The simplest ratio of atoms. If Molecular is $C_6H_{12}O_6$, Empirical is $CH_2O$.</p>
+                    
+                    <div class="pro-tip">
+                        <div class="tip-icon">💡</div>
+                        <div class="tip-content">
+                            <strong>Limiting Reagent Hack</strong>
+                            Calculate moles divided by coefficient for all reactants. The <strong>smallest</strong> value is your limiting reagent. It decides when the party stops.
+                        </div>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Physical",
+                title: "Structure of Atom",
+                subtitle: "Quantum Numbers & Configurations",
+                content: `
+                    <div class="fun-intro"><em>The Solar System that isn't.</em> Bohr tried, but Heisenberg said "You can't know where the electron is!"</div>
+
+                    <h3>1. Quantum Numbers (The Address)</h3>
+                    <ul>
+                        <li><strong>Principal (n):</strong> Size/Shell (1, 2, 3...)</li>
+                        <li><strong>Azimuthal (l):</strong> Shape (0=s, 1=p, 2=d, 3=f)</li>
+                        <li><strong>Magnetic (m):</strong> Orientation (-l to +l)</li>
+                        <li><strong>Spin (s):</strong> Spin (+1/2, -1/2)</li>
+                    </ul>
+
+                    <h3>2. Electronic Configuration Rules</h3>
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Filling Order</span>
+                        1s 2s 2p 3s 3p 4s 3d...
+                        <br><strong>Trick:</strong> $4s$ fills before $3d$ because it has lower Energy ($n+l$ rule).
+                    </div>
+
+                    <h3>3. Bohr's Model Formulas</h3>
+                    <div class="formula-box">
+                        <strong>Radius</strong>
+                        <em>r = 0.529 (n² / Z) Å</em>
+                        <strong>Energy</strong>
+                        <em>E = -13.6 (Z² / n²) eV</em>
+                    </div>
+                    
+
+[Image of Bohr model]
+
+                `
+            },
+            {
+                class: "11",
+                type: "Inorganic",
+                title: "Periodicity",
+                subtitle: "Trends in the Table",
+                content: `
+                    <div class="fun-intro"><em>The Cheat Sheet of the Universe.</em> The Periodic Table isn't random; it's a map of behavior.</div>
+
+                    <h3>1. Atomic Radius</h3>
+                    <p><strong>Left → Right:</strong> Decreases (Nuclear pull increases).<br><strong>Top → Bottom:</strong> Increases (New shells added).</p>
+
+                    <h3>2. Ionization Enthalpy (IE)</h3>
+                    <p>Energy needed to steal an electron. High for Noble gases.</p>
+                    <p><strong>Exception:</strong> N > O (Half-filled stability) and Be > B (Full s-orbital).</p>
+
+                    <h3>3. Electronegativity</h3>
+                    <p>How greedy an atom is. Fluorine is the greediest (4.0).</p>
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Greediest Elements</span>
+                        <strong>F O N Cl</strong> (Phone Call)
+                        <br>Fluorine > Oxygen > Nitrogen ≈ Chlorine
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Inorganic",
+                title: "Bonding",
+                subtitle: "VSEPR, Hybridization & MOT",
+                content: `
+                    <div class="fun-intro"><em>Atomic Marriage.</em> Why atoms stick together. Sometimes they share (Covalent), sometimes they steal (Ionic).</div>
+
+                    <h3>1. VSEPR Theory (Shapes)</h3>
+                    <p>Electron pairs hate each other. They spread out.</p>
+                    <ul>
+                        <li>2 pairs: Linear (180°)</li>
+                        <li>3 pairs: Trigonal Planar (120°)</li>
+                        <li>4 pairs: Tetrahedral (109.5°)</li>
+                    </ul>
+
+                    <h3>2. Hybridization Hack</h3>
+                    <div class="formula-box">
+                        <strong>Z = ½ (V + M - C + A)</strong>
+                        <em>2=sp, 3=sp², 4=sp³</em>
+                    </div>
+                    <p>(V=Valence e-, M=Monovalent atoms, C=Cation, A=Anion)</p>
+
+                    <h3>3. Molecular Orbital Theory (MOT)</h3>
+                    <p><strong>Bond Order = ½ (bonding - antibonding)</strong>. <br>If BO = 0, molecule doesn't exist ($He_2$).<br>If unpaired electrons present → Paramagnetic ($O_2$ is paramagnetic!).</p>
+                `
+            },
+            {
+                class: "11",
+                type: "Physical",
+                title: "Thermodynamics",
+                subtitle: "Enthalpy, Entropy & Gibbs",
+                content: `
+                    <div class="fun-intro"><em>Follow the Money (Energy).</em> The universe is lazy (Max Entropy) and prefers low energy.</div>
+
+                    <h3>1. The Laws</h3>
+                    <ul>
+                        <li><strong>1st Law:</strong> $\Delta U = q + w$ (Conservation).</li>
+                        <li><strong>Hess's Law:</strong> Route doesn't matter, only start and end matter. $\Delta H$ is state function.</li>
+                    </ul>
+
+                    <h3>2. Gibbs Free Energy ($\Delta G$)</h3>
+                    <p>The judge of spontaneity.</p>
+                    <div class="formula-box">
+                        <strong>The Equation</strong>
+                        <em>ΔG = ΔH - TΔS</em>
+                    </div>
+                    <p>If $\Delta G$ is <strong>Negative</strong>, reaction is Spontaneous (Happens automatically).</p>
+
+                    <div class="pro-tip">
+                        <div class="tip-icon">🔥</div>
+                        <div class="tip-content">
+                            <strong>Entropy ($\Delta S$)</strong>
+                            Gas > Liquid > Solid. If gas is produced, $\Delta S$ is positive (Happy Universe).
+                        </div>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Physical",
+                title: "Equilibrium",
+                subtitle: "Kp/Kc, pH & Le Chatelier",
+                content: `
+                    <div class="fun-intro"><em>The Balancing Act.</em> Reactions don't always finish. Sometimes they get stuck in the middle.</div>
+
+                    <h3>1. Equilibrium Constant (K)</h3>
+                    <p>Products / Reactants. Only changes with <strong>Temperature</strong>.</p>
+                    <div class="formula-box">
+                        <strong>Kp vs Kc</strong>
+                        <em>Kp = Kc (RT)^Δn</em>
+                    </div>
+
+                    <h3>2. Le Chatelier's Principle</h3>
+                    <p>If you disturb a system, it fights back.</p>
+                    <ul>
+                        <li><strong>Add Reactant:</strong> Shifts Forward.</li>
+                        <li><strong>Increase Pressure:</strong> Shifts to side with FEWER gas moles.</li>
+                        <li><strong>Catalyst:</strong> No shift (just reaches K faster).</li>
+                    </ul>
+
+                    <h3>3. pH Formulas</h3>
+                    <div class="formula-box">
+                        <em>pH = -log[H+]</em>
+                        <em>pH + pOH = 14</em>
+                        <strong>Buffer (Henderson)</strong>
+                        <em>pH = pKa + log(Salt/Acid)</em>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Physical",
+                title: "Redox Reactions",
+                subtitle: "Oxidation Numbers & Balancing",
+                content: `
+                    <div class="fun-intro"><em>Electron Trading.</em> One loses, one gains. There is no charity in Chemistry.</div>
+
+                    <h3>1. Definitions</h3>
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">OIL RIG</span>
+                        <strong>O</strong>xidation <strong>I</strong>s <strong>L</strong>oss (of e-).
+                        <br><strong>R</strong>eduction <strong>I</strong>s <strong>G</strong>ain (of e-).
+                    </div>
+
+                    <h3>2. Oxidation Numbers</h3>
+                    <ul>
+                        <li>Group 1: +1, Group 2: +2.</li>
+                        <li>Oxygen: -2 (mostly), -1 (peroxide).</li>
+                        <li>Hydrogen: +1 (with non-metals), -1 (with metals).</li>
+                    </ul>
+
+                    <h3>3. Disproportionation</h3>
+                    <p>When the same element gets oxidized AND reduced. Example: $H_2O_2 \rightarrow H_2O + O_2$.</p>
+                `
+            },
+            {
+                class: "11",
+                type: "Organic",
+                title: "Organic Basics (GOC)",
+                subtitle: "Effects, Naming & Isomerism",
+                content: `
+                    <div class="fun-intro"><em>Carbon is Promiscuous.</em> It bonds with everyone. General Organic Chemistry is the grammar of reactions.</div>
+
+                    <h3>1. Electronic Effects</h3>
+                    <ul>
+                        <li><strong>Inductive (I):</strong> Permanent shifting of sigma electrons. (Distance dependent).</li>
+                        <li><strong>Resonance (R):</strong> Delocalization of pi electrons. (Very Stable!).</li>
+                        <li><strong>Hyperconjugation (H):</strong> Sigma-pi interaction. Stability of alkenes/carbocations.</li>
+                    </ul>
+
+                    <h3>2. Carbocation Stability</h3>
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Order of Stability</span>
+                        <strong>3° > 2° > 1° > Methyl</strong>
+                        <br>(Because alkyl groups donate electrons and stabilize the + charge).
+                    </div>
+
+                    <h3>3. Isomerism</h3>
+                    <p>Same formula, different swag.</p>
+                    <ul>
+                        <li><strong>Chain/Position/Functional:</strong> Structural.</li>
+                        <li><strong>Geometrical:</strong> Cis/Trans (Restricted rotation).</li>
+                        <li><strong>Optical:</strong> Chiral carbons (Mirror images).</li>
+                    </ul>
+                `
+            },
+            {
+                class: "11",
+                type: "Organic",
+                title: "Hydrocarbons",
+                subtitle: "Alkanes, Alkenes & Benzene",
+                content: `
+                    <div class="fun-intro"><em>Fuel for Life.</em> From cooking gas to plastics.</div>
+
+                    <h3>1. Alkanes (Paraffins)</h3>
+                    <p>Lazy. Only react with UV light (Halogenation) or burning.</p>
+
+                    <h3>2. Alkenes (Olefins)</h3>
+                    <p>Reactive pi-bond. Addition reactions.</p>
+                    <div class="reaction-box">
+                        <span class="reaction-title">Markovnikov's Rule</span>
+                        "The rich get richer."
+                        <br>H adds to the carbon that already has MORE Hydrogens.
+                        <br>Br adds to the carbon with FEWER Hydrogens (More stable carbocation).
+                    </div>
+
+                    <h3>3. Benzene & Aromaticity</h3>
+                    <p>Huckel's Rule: Must be cyclic, planar, and have $(4n+2) \pi$ electrons.</p>
+                    <p>Benzene prefers <strong>Substitution</strong>, not Addition (to keep its aromatic ring intact!).</p>
+                `
+            },
+
+            // === CLASS 12 (II PUC) ===
+
+            {
+                class: "12",
+                type: "Physical",
+                title: "Solutions",
+                subtitle: "Colligative Properties",
+                content: `
+                    <div class="fun-intro"><em>Mix it up.</em> Why salt melts ice and why IV fluids need to be precise.</div>
+
+                    <h3>1. Raoult's Law</h3>
+                    <p>Partial pressure = Mole fraction × Pure pressure.</p>
+
+                    <h3>2. Colligative Properties</h3>
+                    <p>Properties that depend ONLY on the number of particles, not identity.</p>
+                    <div class="formula-box">
+                        <strong>Elevation in BP</strong>
+                        <em>ΔTb = i Kb m</em>
+                        <strong>Depression in FP</strong>
+                        <em>ΔTf = i Kf m</em>
+                        <strong>Osmotic Pressure</strong>
+                        <em>π = i CRT</em>
+                    </div>
+
+                    <h3>3. Van't Hoff Factor (i)</h3>
+                    <p>Correction for dissociation/association.</p>
+                    <ul>
+                        <li>NaCl ($i=2$), $MgCl_2$ ($i=3$).</li>
+                        <li>If association (Dimer), $i < 1$.</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                type: "Physical",
+                title: "Electrochemistry",
+                subtitle: "Nernst & Batteries",
+                content: `
+                    <div class="fun-intro"><em>Power in a Beaker.</em> Turning chemical energy into electricity.</div>
+
+                    <h3>1. Nernst Equation</h3>
+                    <p>Calculates cell potential under non-standard conditions.</p>
+                    <div class="formula-box">
+                        <em>E = E° - (0.059/n) log(Q)</em>
+                    </div>
+
+                    <h3>2. Conductance</h3>
+                    <ul>
+                        <li><strong>Kohlrausch Law:</strong> Limiting molar conductivity is sum of cation + anion.</li>
+                        <li>Dilution increases Molar Conductance ($\Lambda_m$) but decreases Specific Conductance ($\kappa$).</li>
+                    </ul>
+
+                    <h3>3. Batteries</h3>
+                    <ul>
+                        <li><strong>Primary:</strong> Use and throw (Dry cell).</li>
+                        <li><strong>Secondary:</strong> Rechargeable (Lead storage).</li>
+                        <li><strong>Fuel Cell:</strong> $H_2 + O_2 \rightarrow H_2O$ (Pollution free, used in Apollo).</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                type: "Physical",
+                title: "Chemical Kinetics",
+                subtitle: "Rate Laws & Arrhenius",
+                content: `
+                    <div class="fun-intro"><em>Need for Speed.</em> How fast does a reaction happen? Diamond → Graphite is spontaneous but takes billion years (Slow Kinetics).</div>
+
+                    <h3>1. Order of Reaction</h3>
+                    <p>Sum of powers in Rate Law. Must be found experimentally!</p>
+                    <div class="formula-box">
+                        <strong>Zero Order</strong>
+                        <em>[A] = [A]₀ - kt</em>
+                        <strong>First Order</strong>
+                        <em>k = (2.303/t) log(A₀/A)</em>
+                        <strong>Half Life (1st)</strong>
+                        <em>t½ = 0.693 / k</em>
+                    </div>
+
+                    <h3>2. Molecularity</h3>
+                    <p>Number of molecules colliding. Can't be zero or fraction. Max is 3.</p>
+
+                    <h3>3. Arrhenius Equation</h3>
+                    <p>Effect of Temp on Rate.</p>
+                    <div class="formula-box"><em>k = A e^(-Ea/RT)</em></div>
+                    <p>For every 10°C rise, rate usually doubles.</p>
+                `
+            },
+            {
+                class: "12",
+                type: "Inorganic",
+                title: "d & f Block Elements",
+                subtitle: "Transition Metals & KMnO4",
+                content: `
+                    <div class="fun-intro"><em>The Colorful Metals.</em> Unpaired d-electrons make them colorful, magnetic, and great catalysts.</div>
+
+                    <h3>1. General Trends</h3>
+                    <ul>
+                        <li><strong>Variable Oxidation States:</strong> (Mn shows up to +7).</li>
+                        <li><strong>Catalytic Property:</strong> Due to large surface area and variable valency.</li>
+                        <li><strong>Colored Ions:</strong> d-d transition. ($Zn^{2+}$ is colorless - Full d-orbital).</li>
+                    </ul>
+
+                    <h3>2. Important Compounds</h3>
+                    <ul>
+                        <li><strong>KMnO₄ (Purple):</strong> Strong Oxidizing agent. Becomes $Mn^{2+}$ (Colorless) in acid.</li>
+                        <li><strong>K₂Cr₂O₇ (Orange):</strong> Oxidizing agent. Turns Green ($Cr^{3+}$) in reaction.</li>
+                    </ul>
+
+                    <h3>3. Lanthanoid Contraction</h3>
+                    <p>Poor shielding of 4f electrons causes size to shrink more than expected. Result: Zr and Hf have almost same size.</p>
+                `
+            },
+            {
+                class: "12",
+                type: "Inorganic",
+                title: "Coordination Compounds",
+                subtitle: "Complexes & Crystal Field Theory",
+                content: `
+                    <div class="fun-intro"><em>Metal-Ligand Dating.</em> Metals surrounded by Ligands who donate electron pairs.</div>
+
+                    <h3>1. IUPAC Naming</h3>
+                    <p>Ligands first (alphabetical) + Metal(Oxidation state).</p>
+                    <p>If complex is Anionic, Metal ends in "-ate" (Ferrate, Argentate).</p>
+
+                    <h3>2. Valence Bond Theory (VBT)</h3>
+                    <ul>
+                        <li><strong>Inner Orbital ($d^2sp^3$):</strong> Strong Ligands ($CN^-, CO$). Pairs up electrons. Diamagnetic.</li>
+                        <li><strong>Outer Orbital ($sp^3d^2$):</strong> Weak Ligands ($Cl^-, F^-$). No pairing. Paramagnetic.</li>
+                    </ul>
+
+                    <h3>3. Crystal Field Theory (CFT)</h3>
+                    <p>Splitting of d-orbitals into $t_{2g}$ and $e_g$. Explains Color!</p>
+                    <p><strong>Spectrochemical Series:</strong> I < Br < Cl < H2O < NH3 < CN < CO</p>
+                `
+            },
+            {
+                class: "12",
+                type: "Organic",
+                title: "Haloalkanes & Haloarenes",
+                subtitle: "SN1 vs SN2 Mechanisms",
+                content: `
+                    <div class="fun-intro"><em>The Gateway Drugs of Organic.</em> Make a halide first, then convert it to anything else.</div>
+
+                    <h3>1. Nucleophilic Substitution</h3>
+                    <div class="reaction-box">
+                        <span class="reaction-title">SN1 vs SN2</span>
+                        <strong>SN1 (Two Step):</strong> 
+                        <br>Forms Carbocation. 3° > 2° > 1°. 
+                        <br>Racemization occurs. Favored by Polar Protic solvents.
+                        <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+                        <strong>SN2 (One Step):</strong> 
+                        <br>Backside Attack. 1° > 2° > 3°. 
+                        <br>Inversion (Walden). Favored by Polar Aprotic solvents.
+                    </div>
+
+                    <h3>2. Grignard Reagent (R-Mg-X)</h3>
+                    <p>Organometallic. R is negative (Nucleophile). Reacts with Acidic H to form Alkane instantly.</p>
+
+                    <h3>3. Named Reactions</h3>
+                    <ul>
+                        <li><strong>Wurtz:</strong> 2 RX + Na → R-R (Double carbon).</li>
+                        <li><strong>Finkelstein:</strong> R-X + NaI → R-I (Halogen exchange).</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                type: "Organic",
+                title: "Alcohols, Phenols & Ethers",
+                subtitle: "Acidity & Name Reactions",
+                content: `
+                    <div class="fun-intro"><em>The Spirits.</em> From drinking alcohol (Ethanol) to antiseptic (Phenol).</div>
+
+                    <h3>1. Acidic Nature</h3>
+                    <p>Phenol > Water > Alcohol > Alkyne.</p>
+                    <p>Phenol is acidic due to resonance stabilization of Phenoxide ion.</p>
+
+                    <h3>2. Distinguishing Tests</h3>
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Lucas Test (ZnCl2 + HCl)</span>
+                        <strong>3° Alcohol:</strong> Turbidity Instantly.
+                        <br><strong>2° Alcohol:</strong> Turbidity in 5 mins.
+                        <br><strong>1° Alcohol:</strong> No Turbidity (unless heated).
+                    </div>
+
+                    <h3>3. Name Reactions</h3>
+                    <ul>
+                        <li><strong>Reimer-Tiemann:</strong> Phenol + CHCl3 + NaOH → Salicylaldehyde.</li>
+                        <li><strong>Kolbe's:</strong> Phenol + CO2 + NaOH → Salicylic Acid (Aspirin precursor).</li>
+                        <li><strong>Williamson's Synthesis:</strong> R-X + R-ONa → R-O-R (Ether). Best for 1° alkyl halides.</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                type: "Organic",
+                title: "Aldehydes, Ketones & Acids",
+                subtitle: "Carbonyl Chemistry",
+                content: `
+                    <div class="fun-intro"><em>The King of Organic.</em> The C=O bond is polar and reactive. This chapter has the most reactions!</div>
+
+                    <h3>1. Nucleophilic Addition</h3>
+                    <p>Nucleophile attacks Carbon, Oxygen takes electrons. Aldehydes are more reactive than Ketones (less steric hindrance).</p>
+
+                    <h3>2. The Name Reaction Duo</h3>
+                    <div class="reaction-box">
+                        <span class="reaction-title">Aldol vs Cannizzaro</span>
+                        <strong>Aldol Condensation:</strong>
+                        <br>Needs $\alpha$-Hydrogen. (e.g., Acetaldehyde).
+                        <br>Forms $\beta$-hydroxy aldehyde.
+                        <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+                        <strong>Cannizzaro Reaction:</strong>
+                        <br>No $\alpha$-Hydrogen. (e.g., Formaldehyde, Benzaldehyde).
+                        <br>Self Oxidation-Reduction (Disproportionation).
+                    </div>
+
+                    <h3>3. Carboxylic Acids</h3>
+                    <p>High Boiling point due to H-bonding (Dimer formation). Acidic strength increases with Electron Withdrawing Groups ($NO_2, Cl$).</p>
+                `
+            },
+            {
+                class: "12",
+                type: "Organic",
+                title: "Amines",
+                subtitle: "Basicity & Diazonium",
+                content: `
+                    <div class="fun-intro"><em>The Fishy Smell.</em> Nitrogen compounds. Bases of organic chemistry.</div>
+
+                    <h3>1. Basic Strength</h3>
+                    <p>Ability to donate lone pair.</p>
+                    <ul>
+                        <li><strong>Gas Phase:</strong> 3° > 2° > 1° (Inductive effect).</li>
+                        <li><strong>Aqueous Phase:</strong> 2° > 1° > 3° (Steric + Solvation + Inductive struggle).</li>
+                        <li>Aniline is a WEAK base (Lone pair busy in resonance).</li>
+                    </ul>
+
+                    <h3>2. Carbylamine Test</h3>
+                    <p>Test for <strong>Primary Amines</strong> only. R-NH2 + CHCl3 + KOH → R-NC (Foul smell).</p>
+
+                    <h3>3. Diazonium Salts ($Ar-N_2^+ Cl^-$)</h3>
+                    <p>The magic synthetic tool. Can be converted to Cl (Sandmeyer), OH (Water), H (H3PO2), F (Balz-Schiemann).</p>
+                `
+            },
+            {
+                class: "12",
+                type: "Organic",
+                title: "Biomolecules",
+                subtitle: "Carbs, Proteins & DNA",
+                content: `
+                    <div class="fun-intro"><em>Chemistry of Life.</em> What we are made of.</div>
+
+                    <h3>1. Carbohydrates</h3>
+                    <ul>
+                        <li><strong>Glucose:</strong> Aldohexose. Reducing sugar (Tollens/Fehling Positive).</li>
+                        <li><strong>Glycosidic Linkage:</strong> Joins monosaccharides (C-O-C).</li>
+                    </ul>
+
+                    <h3>2. Proteins</h3>
+                    <p>Polymers of Amino Acids joined by <strong>Peptide Bond (-CONH-)</strong>.</p>
+                    <ul>
+                        <li><strong>Primary Structure:</strong> Sequence of amino acids.</li>
+                        <li><strong>Denaturation:</strong> Breaking of H-bonds (Boiling egg). 1° structure remains intact.</li>
+                    </ul>
+
+                    <h3>3. Nucleic Acids</h3>
+                    <ul>
+                        <li><strong>DNA:</strong> Double helix. A=T, G≡C. Deoxyribose.</li>
+                        <li><strong>RNA:</strong> Single strand. Uracil instead of Thymine.</li>
+                    </ul>
+                `
+            }
+        ];
+
+        // --- 2. APP LOGIC ---
+        
+        const listContainer = document.getElementById('topic-list');
+        const reader = document.getElementById('reader-overlay');
+        const readerTitle = document.getElementById('reader-title');
+        const readerBody = document.getElementById('reader-body');
+        const readerCat = document.getElementById('reader-category');
+
+        // Initial Render
+        function init() {
+            let currentClass = "";
+            
+            chemistryData.forEach((topic, index) => {
+                // Add Section Header if class changes
+                if(topic.class !== currentClass) {
+                    const header = document.createElement('div');
+                    header.className = 'section-header';
+                    header.innerText = `Class ${topic.class} Syllabus`;
+                    listContainer.appendChild(header);
+                    currentClass = topic.class;
+                }
+
+                const card = document.createElement('div');
+                card.className = `topic-card class-${topic.class}`;
+                
+                // Color coding tags
+                let tagClass = 'tag-physical';
+                if(topic.type === 'Organic') tagClass = 'tag-organic';
+                if(topic.type === 'Inorganic') tagClass = 'tag-inorganic';
+
+                card.innerHTML = `
+                    <div class="topic-info">
+                        <span class="topic-title">${topic.title}</span>
+                        <span class="topic-subtitle">${topic.subtitle}</span>
+                        <span class="topic-tag ${tagClass}">${topic.type}</span>
+                    </div>
+                `;
+                card.onclick = () => openReader(index);
+                listContainer.appendChild(card);
+            });
+        }
+
+        function openReader(index) {
+            const data = chemistryData[index];
+            readerTitle.innerHTML = data.title;
+            readerCat.innerText = `Class ${data.class} • ${data.type}`;
+            readerBody.innerHTML = data.content;
+            
+            reader.style.display = 'flex';
+            setTimeout(() => {
+                reader.classList.add('visible');
+            }, 10);
+        }
+
+        function closeReader() {
+            reader.classList.remove('visible');
+            setTimeout(() => {
+                reader.style.display = 'none';
+            }, 300);
+        }
+
+        // Run
+        init();
+
+        // Check Login
+        if (!localStorage.getItem('kcet_user')) { window.location.href = 'index.html'; }
+
+    </script>
+</body>
+</html>

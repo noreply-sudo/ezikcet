@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Biology Master - KCET</title>
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="theme-color" content="#28a745">
+    <style>
+        /* --- CORE THEME (FOREST/LIFE VIBE) --- */
+        :root {
+            --primary: #28a745;       /* Leaf Green */
+            --primary-dark: #1e7e34;
+            --accent: #d63384;        /* Floral Pink */
+            --bg: #f1f8f3;
+            --text: #212529;
+            --card-bg: #ffffff;
+            --cell-purple: #6f42c1;   /* Genetics */
+            --zoo-orange: #fd7e14;    /* Zoology */
+            --bot-green: #20c997;     /* Botany */
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            width: 100%; max-width: 600px; padding: 15px 20px; box-sizing: border-box;
+            display: flex; align-items: center; background: rgba(255,255,255,0.95); 
+            border-bottom: 1px solid #d4edda; z-index: 20; flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+        .back-btn { 
+            text-decoration: none; font-size: 1rem; color: var(--primary); 
+            font-weight: 700; margin-right: 15px; display: flex; align-items: center;
+            background: #e8f5e9; padding: 8px 12px; border-radius: 8px;
+        }
+        h1 { margin: 0; font-size: 1.3rem; color: var(--text); font-weight: 800; letter-spacing: -0.5px; }
+
+        /* --- SCROLLABLE LIST --- */
+        .scroll-area {
+            width: 100%; max-width: 600px; flex: 1; overflow-y: auto;
+            padding: 20px; box-sizing: border-box; padding-bottom: 80px;
+            scroll-behavior: smooth;
+        }
+
+        /* --- SECTION HEADERS --- */
+        .section-header {
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: #6c757d; font-weight: 800; margin: 30px 0 15px 5px;
+            display: flex; align-items: center;
+        }
+        .section-header::after { content:''; flex:1; height:1px; background:#c3e6cb; margin-left:15px; }
+
+        /* --- TOPIC CARDS --- */
+        .topic-card {
+            background: var(--card-bg); border-radius: 16px;
+            padding: 22px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.08); cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; border: 1px solid white;
+        }
+        .topic-card:active { transform: scale(0.97); }
+        
+        /* Decorative Strip (Organic Curve) */
+        .topic-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+            background: linear-gradient(180deg, var(--primary), #a2cf6e);
+            border-radius: 4px 0 0 4px;
+        }
+        .topic-card.class-12::before { background: linear-gradient(180deg, #20c997, #0dcaf0); }
+
+        .topic-info { flex: 1; margin-left: 12px; }
+        .topic-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 6px; display: block; color: var(--text); }
+        .topic-subtitle { font-size: 0.85rem; color: #6c757d; font-weight: 500; line-height: 1.3; }
+        
+        .topic-tag {
+            font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; font-weight: bold;
+            text-transform: uppercase; margin-top: 5px; display: inline-block;
+        }
+        .tag-bot { background: #d1e7dd; color: #0f5132; }
+        .tag-zoo { background: #fff3cd; color: #856404; }
+        .tag-gen { background: #e2e3e5; color: #383d41; }
+
+        /* --- READER OVERLAY --- */
+        #reader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 100; display: none;
+            flex-direction: column; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #reader-overlay.visible { opacity: 1; }
+
+        .reader-header {
+            padding: 15px 20px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; flex-shrink: 0; z-index: 101;
+        }
+        .close-btn { 
+            background: #f8f9fa; border: none; width: 40px; height: 40px; 
+            border-radius: 50%; font-size: 1.5rem; cursor: pointer; color: #333;
+            display: flex; justify-content: center; align-items: center;
+            transition: background 0.2s;
+        }
+        .close-btn:active { background: #e2e6ea; }
+
+        .reader-content {
+            flex: 1; overflow-y: auto; padding: 25px; line-height: 1.8;
+            max-width: 700px; margin: 0 auto; width: 100%; box-sizing: border-box;
+            background: #fff; padding-bottom: 100px;
+        }
+
+        /* --- CONTENT STYLING --- */
+        
+        .reader-content h2 { 
+            color: var(--primary); font-size: 2rem; margin-top: 10px; margin-bottom: 20px;
+            font-weight: 900; letter-spacing: -1px; line-height: 1.1;
+        }
+        
+        .reader-content h3 { 
+            margin-top: 40px; margin-bottom: 15px; font-size: 1.2rem; 
+            color: #343a40; font-weight: 700; position: relative; padding-left: 20px;
+        }
+        /* Leaf Icon for H3 */
+        .reader-content h3::before {
+            content: '🍃'; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            font-size: 0.9rem;
+        }
+
+        /* 1. NCERT Gold Standard Box */
+        .ncert-box {
+            background: #fff3cd; color: #856404;
+            padding: 20px; border-radius: 12px; margin: 25px 0;
+            border-left: 5px solid #ffc107;
+            position: relative;
+        }
+        .ncert-box::before { content: 'NCERT FACT'; position: absolute; top: 10px; right: 10px; font-size: 0.6rem; font-weight: bold; opacity: 0.6; }
+
+        /* 2. Diagram / Flowchart Box (Mental Diagrams) */
+        .diagram-box {
+            background: #f8f9fa; border: 2px dashed #dee2e6;
+            padding: 25px; border-radius: 16px; margin: 25px 0;
+            text-align: center; font-family: monospace; color: #495057;
+        }
+        .flow-arrow { color: var(--primary); font-weight: bold; margin: 0 5px; }
+        .diagram-label { background: white; padding: 5px 10px; border: 1px solid #ced4da; border-radius: 4px; display: inline-block; margin: 5px; font-weight: bold; }
+
+        /* 3. Mnemonic Leaf */
+        .mnemonic-box {
+            background: #d4edda; color: #155724;
+            padding: 20px; border-radius: 12px 0 12px 0; margin: 25px 0;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+        }
+        .mnemonic-title { font-weight: 800; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 5px; display: block; opacity: 0.8; }
+
+        /* Lists */
+        ul { padding-left: 20px; list-style-type: none; }
+        li { margin-bottom: 10px; position: relative; padding-left: 25px; }
+        li::before {
+            content: '🧬'; color: var(--primary); font-size: 0.9rem;
+            position: absolute; left: 0; top: 3px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="back-btn">
+            <span style="font-size:1.2rem; margin-right:5px;">←</span> Home
+        </a>
+        <h1 style="margin-left: auto;">Biology Lab</h1>
+    </div>
+
+    <div class="scroll-area" id="topic-list">
+        </div>
+
+    <div id="reader-overlay">
+        <div class="reader-header">
+            <span style="font-weight:700; color:var(--primary); font-size: 0.9rem; text-transform:uppercase; letter-spacing:1px;" id="reader-category">Class 11</span>
+            <button class="close-btn" onclick="closeReader()">×</button>
+        </div>
+        <div class="reader-content">
+            <h2 id="reader-title">Topic Title</h2>
+            <div id="reader-body">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA REPOSITORY (24 TOPICS) ---
+        const bioData = [
+            
+            // === CLASS 11 (I PUC) ===
+            
+            {
+                class: "11",
+                type: "Botany",
+                title: "Biological Classification",
+                subtitle: "Monera to Animalia",
+                content: `
+                    <div class="ncert-box">
+                        <strong>R.H. Whittaker (1969):</strong> Proposed 5 Kingdom Classification based on Cell structure, Thallus org, Mode of nutrition, Reproduction, and Phylogenetic relationships.
+                    </div>
+                    
+
+[Image of kingdom classification]
+
+                    <h3>1. The 5 Kingdoms</h3>
+                    <ul>
+                        <li><strong>Monera:</strong> Prokaryotes. Bacteria. (Sole members). Mycoplasma = No cell wall.</li>
+                        <li><strong>Protista:</strong> Unicellular Eukaryotes. (Amoeba, Euglena). "Dustbin of classification".</li>
+                        <li><strong>Fungi:</strong> Chitin Cell Wall. Saprophytic.</li>
+                    </ul>
+
+                    <h3>2. Virus vs Viroids</h3>
+                    <div class="diagram-box">
+                        <span class="diagram-label">Virus</span> 
+                        = Protein Coat + Genetic Material (DNA/RNA)
+                        <br><br>
+                        <span class="diagram-label">Viroid</span> 
+                        = Low Molecular Wt RNA (No Protein Coat)
+                    </div>
+                    <p><strong>Prions:</strong> Abnormally folded proteins (Mad Cow Disease).</p>
+
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Taxonomic Hierarchy</span>
+                        <strong>K</strong>eep <strong>P</strong>ots <strong>C</strong>lean <strong>O</strong>r <strong>F</strong>amily <strong>G</strong>ets <strong>S</strong>ick.
+                        <br>(Kingdom, Phylum, Class, Order, Family, Genus, Species).
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Botany",
+                title: "Morphology",
+                subtitle: "Flower, Fruit & Roots",
+                content: `
+                    <div class="ncert-box">
+                        <strong>Edible Parts:</strong>
+                        <br>Mango/Coconut = Mesocarp (Drupe).
+                        <br>Apple/Pear = Thalamus (False Fruit).
+                    </div>
+                    
+
+[Image of parts of a flower]
+
+                    <h3>1. Inflorescence</h3>
+                    <ul>
+                        <li><strong>Racemose:</strong> Main axis grows indefinitely. Flowers in Acropetal order (New at top).</li>
+                        <li><strong>Cymose:</strong> Main axis terminates in flower. Basipetal order.</li>
+                    </ul>
+
+                    <h3>2. Placentation (Arrangement of Ovules)</h3>
+                    <div class="mnemonic-box">
+                        <span class="mnemonic-title">Memory Hack</span>
+                        <strong>M</strong>arigold = <strong>B</strong>asal.
+                        <strong>P</strong>ea = <strong>M</strong>arginal.
+                        <strong>L</strong>emon = <strong>A</strong>xile.
+                        <strong>M</strong>ustard = <strong>P</strong>arietal.
+                        <strong>P</strong>rimrose = <strong>F</strong>ree Central.
+                        <br><em>"Map Lampp"</em>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Zoology",
+                title: "Structural Organization",
+                subtitle: "Tissues & Cockroach",
+                content: `
+                    <h3>1. Animal Tissues</h3>
+                    <ul>
+                        <li><strong>Epithelial:</strong> Covering. Squamous (Lungs), Cuboidal (Ducts), Columnar (Intestine).</li>
+                        <li><strong>Connective:</strong> Blood, Bone, Cartilage. Most abundant.</li>
+                    </ul>
+
+                    <h3>2. Cockroach (Periplaneta americana)</h3>
+                    <div class="diagram-box">
+                        Head (6 segments) <span class="flow-arrow">--</span> Thorax (3) <span class="flow-arrow">--</span> Abdomen (10)
+                    </div>
+                    <p><strong>Excretion:</strong> Malpighian Tubules (Uricotelic).</p>
+                    <p><strong>Vision:</strong> Mosaic vision (High sensitivity, Low resolution).</p>
+                `
+            },
+            {
+                class: "11",
+                type: "Botany",
+                title: "Cell: The Unit of Life",
+                subtitle: "Prokaryote vs Eukaryote",
+                content: `
+                    <h3>1. The Cell Theory</h3>
+                    <p>Schleiden & Schwann. Modified by Virchow ("Omnis cellula-e cellula" - Cells come from pre-existing cells).</p>
+                    
+
+[Image of prokaryotic cell diagram]
+
+                    <h3>2. Organelles</h3>
+                    <ul>
+                        <li><strong>Mitochondria:</strong> Powerhouse. Double membrane. Has own DNA (70S).</li>
+                        <li><strong>Ribosomes:</strong> Protein factory. Palade particles. Not membrane bound.</li>
+                        <li><strong>Lysosomes:</strong> Suicidal bags. Acidic pH.</li>
+                    </ul>
+
+                    <h3>3. Fluid Mosaic Model</h3>
+                    <p>Singer & Nicolson (1972). "Protein icebergs in a sea of lipids".</p>
+                `
+            },
+            {
+                class: "11",
+                type: "Botany",
+                title: "Cell Cycle",
+                subtitle: "Mitosis & Meiosis",
+                content: `
+                    <h3>1. Interphase (95% duration)</h3>
+                    <div class="diagram-box">
+                        <span class="diagram-label">G1</span> (Growth)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">S</span> (DNA Replication)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">G2</span> (Prep)
+                    </div>
+                    <p><strong>Go Phase:</strong> Quiescent stage (Heart cells).</p>
+                    
+
+[Image of mitosis stages]
+
+                    <h3>2. Mitosis vs Meiosis</h3>
+                    <ul>
+                        <li><strong>Mitosis:</strong> Equation division. 2n -> 2n. Growth/Repair.</li>
+                        <li><strong>Meiosis:</strong> Reduction division. 2n -> n. Gametes.</li>
+                    </ul>
+
+                    <div class="ncert-box">
+                        <strong>Crossing Over:</strong> Occurs in <strong>Pachytene</strong> of Prophase I. Enzyme: Recombinase.
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Botany",
+                title: "Plant Physiology",
+                subtitle: "Photosynthesis & Respiration",
+                content: `
+                    <h3>1. Photosynthesis</h3>
+                    <p><strong>Light Reaction (Grana):</strong> ATP + NADPH produced. Splitting of water.</p>
+                    <p><strong>Dark Reaction (Stroma):</strong> CO2 fixation.</p>
+                    
+                    <h3>2. C3 vs C4 Plants</h3>
+                    <div class="diagram-box">
+                        <strong>C3 (Rice/Wheat)</strong>: First product PGA (3C). Rubisco enzyme.
+                        <br><br>
+                        <strong>C4 (Maize/Sorghum)</strong>: First product OAA (4C). Kranz Anatomy. No Photorespiration (More efficient!).
+                    </div>
+
+                    <h3>3. Glycolysis (EMP Pathway)</h3>
+                    <p>Occurs in Cytoplasm. Glucose (6C) -> 2 Pyruvate (3C). Net gain: 2 ATP.</p>
+                `
+            },
+            {
+                class: "11",
+                type: "Zoology",
+                title: "Human Physiology: Digestion",
+                subtitle: "Actually Removed from Syllabus",
+                content: `
+                    <div class="ncert-box">
+                        <em>Note: Digestion is deleted from recent NCERT, but Breathing is key. Let's focus on Breathing.</em>
+                    </div>
+                `
+            },
+            {
+                class: "11",
+                type: "Zoology",
+                title: "Breathing & Exchange",
+                subtitle: "Volumes & Capacities",
+                content: `
+                    <h3>1. Respiratory Volumes</h3>
+                    <ul>
+                        <li><strong>Tidal Vol (TV):</strong> Normal breath (500ml).</li>
+                        <li><strong>Residual Vol (RV):</strong> Left after forced exhale (1100ml).</li>
+                        <li><strong>Vital Capacity (VC):</strong> Max air you can breathe in after forced exhale (VC = ERV + TV + IRV).</li>
+                    </ul>
+
+                    <h3>2. Transport of Gases</h3>
+                    <p><strong>O2:</strong> 97% by RBC, 3% Plasma.</p>
+                    <p><strong>CO2:</strong> 70% as Bicarbonate, 20-25% RBC, 7% Plasma.</p>
+                `
+            },
+            {
+                class: "11",
+                type: "Zoology",
+                title: "Body Fluids",
+                subtitle: "Heart & Blood",
+                content: `
+                    <h3>1. Blood Groups (ABO)</h3>
+                    <p>Antigens on RBC surface. Antibodies in plasma.</p>
+                    <p><strong>Universal Donor:</strong> O- (No antigens).</p>
+                    <p><strong>Universal Recipient:</strong> AB+ (No antibodies).</p>
+                    
+
+[Image of human heart diagram]
+
+                    <h3>2. Cardiac Cycle</h3>
+                    <div class="diagram-box">
+                        <span class="diagram-label">SAN</span> (Pacemaker)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">AVN</span>
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">Bundle of His</span>
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">Purkinje Fibers</span>
+                    </div>
+
+                    <p><strong>Double Circulation:</strong> Pulmonary (Heart-Lungs) + Systemic (Heart-Body).</p>
+                `
+            },
+            {
+                class: "11",
+                type: "Zoology",
+                title: "Excretion",
+                subtitle: "Nephron & Urine Formation",
+                content: `
+                    <h3>1. Urine Formation Steps</h3>
+                    <ul>
+                        <li><strong>Filtration:</strong> Glomerulus (Non-selective).</li>
+                        <li><strong>Reabsorption:</strong> PCT (70-80% electrolytes/water). Loop of Henle (Concentration).</li>
+                        <li><strong>Secretion:</strong> DCT (K+, H+ maintenance).</li>
+                    </ul>
+                    
+
+[Image of nephron structure]
+
+                    <h3>2. Counter Current Mechanism</h3>
+                    <p>Henle's Loop + Vasa Recta. Maintains high osmolarity in medulla to concentrate urine.</p>
+                `
+            },
+
+            // === CLASS 12 (II PUC) ===
+
+            {
+                class: "12",
+                type: "Botany",
+                title: "Reproduction in Plants",
+                subtitle: "Double Fertilization",
+                content: `
+                    <h3>1. Pollination</h3>
+                    <ul>
+                        <li><strong>Autogamy:</strong> Self. Same flower.</li>
+                        <li><strong>Geitonogamy:</strong> Self-Genetically. Different flower, same plant.</li>
+                        <li><strong>Xenogamy:</strong> Cross. Different plant.</li>
+                    </ul>
+
+                    <h3>2. Double Fertilization (Angiosperms Unique)</h3>
+                    <div class="diagram-box">
+                        <strong>Syngamy:</strong>
+                        <br>Male Gamete (n) + Egg (n) <span class="flow-arrow">-></span> Zygote (2n)
+                        <br><br>
+                        <strong>Triple Fusion:</strong>
+                        <br>Male Gamete (n) + Polar Nuclei (2n) <span class="flow-arrow">-></span> Endosperm (3n)
+                    </div>
+                `
+            },
+            {
+                class: "12",
+                type: "Zoology",
+                title: "Human Reproduction",
+                subtitle: "Gametes & Menstrual Cycle",
+                content: `
+                    <h3>1. Spermatogenesis</h3>
+                    <p>Spermatogonia (2n) -> Primary (2n) -> Secondary (n) -> Spermatids (n) -> Sperm.</p>
+
+                    <h3>2. Menstrual Cycle</h3>
+                    <div class="diagram-box">
+                        <span class="diagram-label">Menstrual</span> (1-5)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">Follicular</span> (LH/FSH rise)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">Ovulatory</span> (Day 14, LH Surge)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">Luteal</span> (Progesterone high)
+                    </div>
+                `
+            },
+            {
+                class: "12",
+                type: "Genetics",
+                title: "Mendelian Genetics",
+                subtitle: "Inheritance & Disorders",
+                content: `
+                    <h3>1. Mendel's Ratios</h3>
+                    <ul>
+                        <li><strong>Monohybrid Phenotype:</strong> 3:1</li>
+                        <li><strong>Monohybrid Genotype:</strong> 1:2:1</li>
+                        <li><strong>Dihybrid Phenotype:</strong> 9:3:3:1</li>
+                    </ul>
+
+                    <h3>2. Genetic Disorders</h3>
+                    <ul>
+                        <li><strong>Haemophilia/Color Blindness:</strong> X-linked Recessive (Men suffer more).</li>
+                        <li><strong>Sickle Cell Anemia:</strong> Autosomal Recessive (Glu -> Val at 6th pos of Beta globin).</li>
+                        <li><strong>Down's Syndrome:</strong> Trisomy 21.</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                type: "Genetics",
+                title: "Molecular Basis",
+                subtitle: "DNA & Central Dogma",
+                content: `
+                    <h3>1. DNA Structure</h3>
+                    <p>Watson & Crick. Double Helix. A=T (2 H-bonds), G≡C (3 H-bonds).</p>
+                    
+
+[Image of DNA double helix]
+
+                    <h3>2. Central Dogma</h3>
+                    <div class="diagram-box">
+                        <span class="diagram-label">DNA</span>
+                        <span class="flow-arrow">--Transcription--></span>
+                        <span class="diagram-label">mRNA</span>
+                        <span class="flow-arrow">--Translation--></span>
+                        <span class="diagram-label">Protein</span>
+                    </div>
+
+                    <h3>3. Lac Operon</h3>
+                    <p>In <em>E. coli</em>. <strong>Inducer:</strong> Lactose. Repressor binds to Operator preventing transcription unless Lactose is present.</p>
+                `
+            },
+            {
+                class: "12",
+                type: "Zoology",
+                title: "Evolution",
+                subtitle: "Darwin & Hardy-Weinberg",
+                content: `
+                    <h3>1. Evidence</h3>
+                    <ul>
+                        <li><strong>Homologous:</strong> Same origin, Diff function (Forelimbs of Whale/Bat). Divergent Evol.</li>
+                        <li><strong>Analogous:</strong> Diff origin, Same function (Wings of Butterfly/Bird). Convergent Evol.</li>
+                    </ul>
+
+                    <h3>2. Hardy-Weinberg Principle</h3>
+                    <div class="ncert-box">
+                        <strong>p² + 2pq + q² = 1</strong>
+                        <br>(p = dominant allele freq, q = recessive allele freq).
+                        <br>Remains constant if no disturbance (Genetic drift, mutation, etc).
+                    </div>
+                `
+            },
+            {
+                class: "12",
+                type: "Zoology",
+                title: "Human Health",
+                subtitle: "Diseases & Immunity",
+                content: `
+                    <h3>1. Common Diseases</h3>
+                    <ul>
+                        <li><strong>Typhoid:</strong> Salmonella typhi. Widal Test.</li>
+                        <li><strong>Malaria:</strong> Plasmodium. Vector: Female Anopheles. Infective stage: Sporozoite.</li>
+                        <li><strong>AIDS:</strong> HIV (Retrovirus). Destroys Macrophages & Helper T-cells.</li>
+                    </ul>
+
+                    <h3>2. Immunity</h3>
+                    <p><strong>Innate:</strong> Birth (Skin, Tears). <br><strong>Acquired:</strong> Memory based (Antibodies).</p>
+                    <p><strong>Antibodies:</strong> IgA (Colostrum/Tears), IgE (Allergy), IgG (Placenta).</p>
+                `
+            },
+            {
+                class: "12",
+                type: "Botany",
+                title: "Biotechnology",
+                subtitle: "PCR & Insulin",
+                content: `
+                    <h3>1. Recombinant DNA</h3>
+                    <p>Restriction Enzymes (Molecular Scissors). E.g., EcoRI cuts at GAATTC.</p>
+
+                    <h3>2. PCR Steps</h3>
+                    <div class="diagram-box">
+                        <span class="diagram-label">Denaturation</span> (94°C)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">Annealing</span> (54°C)
+                        <span class="flow-arrow">-></span>
+                        <span class="diagram-label">Extension</span> (72°C, Taq Polymerase)
+                    </div>
+
+                    <h3>3. Applications</h3>
+                    <ul>
+                        <li><strong>Bt Cotton:</strong> Cry genes (cryIAc) kill bollworms.</li>
+                        <li><strong>Human Insulin:</strong> Chains A and B produced separately in E. coli and joined by Disulphide bonds.</li>
+                    </ul>
+                `
+            },
+            {
+                class: "12",
+                type: "Botany",
+                title: "Ecology",
+                subtitle: "Interactions & Conservation",
+                content: `
+                    <h3>1. Population Interactions</h3>
+                    <ul>
+                        <li><strong>Mutualism (+/+):</strong> Lichen, Mycorrhiza.</li>
+                        <li><strong>Competition (-/-):</strong> Darwin's struggle.</li>
+                        <li><strong>Predation/Parasitism (+/-):</strong> Tiger/Deer, Lice/Human.</li>
+                        <li><strong>Commensalism (+/0):</strong> Orchid on Mango tree.</li>
+                    </ul>
+                    
+
+[Image of food web diagram]
+
+                    <h3>2. Conservation</h3>
+                    <ul>
+                        <li><strong>In-situ (On site):</strong> National Parks, Biosphere Reserves, Sacred Groves.</li>
+                        <li><strong>Ex-situ (Off site):</strong> Zoos, Botanical Gardens, Cryopreservation.</li>
+                    </ul>
+                `
+            }
+        ];
+
+        // --- 2. APP LOGIC ---
+        
+        const listContainer = document.getElementById('topic-list');
+        const reader = document.getElementById('reader-overlay');
+        const readerTitle = document.getElementById('reader-title');
+        const readerBody = document.getElementById('reader-body');
+        const readerCat = document.getElementById('reader-category');
+
+        // Initial Render
+        function init() {
+            let currentClass = "";
+            
+            bioData.forEach((topic, index) => {
+                // Add Section Header if class changes
+                if(topic.class !== currentClass) {
+                    const header = document.createElement('div');
+                    header.className = 'section-header';
+                    header.innerText = `Class ${topic.class} Syllabus`;
+                    listContainer.appendChild(header);
+                    currentClass = topic.class;
+                }
+
+                const card = document.createElement('div');
+                card.className = `topic-card class-${topic.class}`;
+                
+                // Color coding tags
+                let tagClass = 'tag-bot';
+                if(topic.type === 'Zoology') tagClass = 'tag-zoo';
+                if(topic.type === 'Genetics') tagClass = 'tag-gen';
+
+                card.innerHTML = `
+                    <div class="topic-info">
+                        <span class="topic-title">${topic.title}</span>
+                        <span class="topic-subtitle">${topic.subtitle}</span>
+                        <span class="topic-tag ${tagClass}">${topic.type}</span>
+                    </div>
+                `;
+                card.onclick = () => openReader(index);
+                listContainer.appendChild(card);
+            });
+        }
+
+        function openReader(index) {
+            const data = bioData[index];
+            readerTitle.innerHTML = data.title;
+            readerCat.innerText = `Class ${data.class} • ${data.type}`;
+            readerBody.innerHTML = data.content;
+            
+            reader.style.display = 'flex';
+            setTimeout(() => {
+                reader.classList.add('visible');
+            }, 10);
+        }
+
+        function closeReader() {
+            reader.classList.remove('visible');
+            setTimeout(() => {
+                reader.style.display = 'none';
+            }, 300);
+        }
+
+        // Run
+        init();
+
+        // Check Login
+        if (!localStorage.getItem('kcet_user')) { window.location.href = 'index.html'; }
+
+    </script>
+</body>
+</html>

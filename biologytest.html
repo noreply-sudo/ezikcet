@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KCET Biology Mock Test</title>
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="theme-color" content="#28a745">
+    <style>
+        :root {
+            --primary: #28a745; /* Green for Bio */
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0; padding: 0; background: #f4f6f9; color: #333;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- HEADER --- */
+        .test-header {
+            background: white; padding: 0 20px; border-bottom: 1px solid #ddd;
+            display: flex; justify-content: space-between; align-items: center;
+            height: 60px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10;
+        }
+        .timer-box {
+            font-size: 1.2rem; font-weight: bold; color: var(--danger);
+            background: #fff0f0; padding: 5px 15px; border-radius: 5px; border: 1px solid #ffcccc;
+            min-width: 80px; text-align: center;
+        }
+        .submit-btn {
+            background: var(--success); color: white; border: none; padding: 10px 20px;
+            border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .submit-btn:hover { background: #218838; }
+
+        /* --- MAIN LAYOUT --- */
+        .test-container {
+            display: flex; flex: 1; overflow: hidden; position: relative;
+        }
+
+        /* Question Area */
+        .question-area {
+            flex: 1; padding: 20px; overflow-y: auto;
+            display: flex; flex-direction: column; max-width: 100%;
+        }
+        .q-card {
+            background: white; padding: 25px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        .q-header {
+            display: flex; justify-content: space-between; margin-bottom: 15px;
+            border-bottom: 1px solid #eee; padding-bottom: 10px;
+        }
+        .q-badge {
+            background: var(--primary); color: white; padding: 2px 8px; 
+            border-radius: 4px; font-size: 0.8rem; font-weight: bold;
+        }
+        .q-text { font-size: 1.15rem; font-weight: 600; margin-bottom: 25px; line-height: 1.6; }
+        
+        /* Options */
+        .option-btn {
+            display: flex; align-items: center; width: 100%; text-align: left; padding: 15px;
+            margin-bottom: 12px; border: 2px solid #eee; border-radius: 8px;
+            background: white; cursor: pointer; transition: 0.2s;
+            font-size: 1rem; position: relative;
+        }
+        .option-btn:hover { background: #f8f9fa; border-color: #ccc; }
+        
+        /* Selection State (During Test) */
+        .option-btn.selected { 
+            border-color: var(--primary); background: #e8f5e9; color: var(--primary); font-weight: 600; 
+        }
+
+        /* Review Mode States */
+        .option-btn.correct-ans {
+            border-color: var(--success); background: #d4edda; color: #155724; font-weight: bold;
+        }
+        .option-btn.correct-ans::after { content: ' (Correct Answer)'; font-size: 0.8rem; margin-left: auto; font-weight: normal; color: #155724; }
+        
+        .option-btn.wrong-ans {
+            border-color: var(--danger); background: #f8d7da; color: #721c24; font-weight: bold;
+        }
+        .option-btn.wrong-ans::after { content: ' (Your Answer)'; font-size: 0.8rem; margin-left: auto; font-weight: normal; color: #721c24; }
+
+        .option-circle {
+            width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%;
+            margin-right: 15px; display: flex; justify-content: center; align-items: center;
+        }
+        .option-btn.selected .option-circle {
+            border-color: var(--primary); background: var(--primary);
+        }
+        .option-btn.selected .option-circle::after {
+            content: '✓'; color: white; font-size: 0.8rem;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex; justify-content: space-between; margin-top: auto; padding-top: 10px;
+        }
+        .nav-btn {
+            padding: 12px 25px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold;
+            background: #6c757d; color: white; transition: 0.2s;
+        }
+        .nav-btn.next { background: var(--primary); }
+        .nav-btn:hover { opacity: 0.9; }
+        .nav-btn:disabled { background: #e9ecef; color: #adb5bd; cursor: not-allowed; }
+
+        /* Sidebar (Question Palette) */
+        .sidebar {
+            width: 320px; background: white; border-left: 1px solid #ddd;
+            display: flex; flex-direction: column; transition: transform 0.3s ease;
+            position: relative; z-index: 20;
+        }
+        .sidebar-header {
+            padding: 15px; background: #f8f9fa; border-bottom: 1px solid #eee;
+            font-weight: bold; text-align: center; color: #555;
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex; justify-content: space-around; padding: 10px; border-bottom: 1px solid #eee; font-size: 0.75rem;
+        }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        
+        .palette-grid {
+            padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+            overflow-y: auto; flex: 1; align-content: start;
+        }
+        .p-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd;
+            background: white; cursor: pointer; font-weight: bold; color: #555;
+            display: flex; justify-content: center; align-items: center; font-size: 0.9rem;
+        }
+        .p-btn:hover { background: #f0f0f0; }
+        
+        /* Palette States */
+        .p-btn.current { border: 2px solid var(--primary); color: var(--primary); }
+        .p-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+        .p-btn.review { background: var(--warning); color: black; border-color: var(--warning); }
+        .p-btn.review-ans { background: #6610f2; color: white; border-color: #6610f2; }
+
+        /* Review Mode Palette */
+        .p-btn.p-correct { background: var(--success); color: white; border-color: var(--success); }
+        .p-btn.p-wrong { background: var(--danger); color: white; border-color: var(--danger); }
+        .p-btn.p-skip { background: #e9ecef; color: #666; }
+
+        /* Mobile Toggle */
+        .mobile-toggle { display: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; }
+        .mobile-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 15;
+        }
+
+        /* RESULT OVERLAY */
+        #result-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: white; z-index: 100; display: none;
+            flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; padding: 20px;
+        }
+        .score-card {
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center;
+            border: 1px solid #eee; width: 90%; max-width: 450px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin: auto;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .score-circle {
+            width: 140px; height: 140px; border-radius: 50%;
+            background: conic-gradient(var(--success) 0%, #eee 0); 
+            display: flex; justify-content: center; align-items: center;
+            margin: 0 auto 25px; position: relative;
+        }
+        .score-inner {
+            width: 120px; height: 120px; background: white; border-radius: 50%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .score-big { font-size: 2.5rem; font-weight: 800; color: var(--dark); }
+        .score-total { font-size: 0.9rem; color: #666; }
+
+        .stat-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;
+        }
+        .stat-box {
+            background: #f8f9fa; padding: 15px; border-radius: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed; right: -320px; top: 60px; bottom: 0; height: calc(100% - 60px);
+            }
+            .sidebar.open { transform: translateX(-320px); }
+            .mobile-toggle { display: block; }
+            .test-header { padding: 0 10px; }
+            .timer-box { font-size: 1rem; min-width: 60px; padding: 5px 10px; }
+            .submit-btn { padding: 8px 15px; font-size: 0.9rem; }
+            .mobile-overlay.active { display: block; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="test-header">
+        <div style="display:flex; align-items:center;">
+            <a href="index.html" onclick="if(!isReviewMode) return confirm('Exit test? Progress will be lost.');" style="text-decoration:none; color:#333; margin-right:15px; font-weight:bold; font-size: 1.2rem;">✕</a>
+            <h3 style="margin:0; font-size:1.1rem; display: flex; flex-direction: column;">
+                <span>Biology</span>
+                <span style="font-size:0.7rem; color:#666; font-weight:normal;">Paper IV</span>
+            </h3>
+        </div>
+        
+        <div class="timer-box" id="timer">80:00</div>
+        
+        <div style="display:flex; gap:15px; align-items: center;">
+            <button class="submit-btn" id="submit-btn-top" onclick="submitTest()">Submit</button>
+            <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+        </div>
+    </div>
+
+    <div class="mobile-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="test-container">
+        
+        <div class="question-area">
+            <div class="q-card">
+                <div class="q-header">
+                    <span style="color:#666; font-weight:600;">Question <span id="q-num">1</span> of 60</span>
+                    <span class="q-badge" id="mark-badge">+1 Mark</span>
+                </div>
+                <div class="q-text" id="q-content">Loading Question...</div>
+                <div id="options-container">
+                    </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prev-btn" onclick="changeQuestion(-1)">Previous</button>
+                <button class="nav-btn" id="review-btn" style="background: #ffc107; color: #000;" onclick="markForReview()">Mark for Review</button>
+                <button class="nav-btn next" id="next-btn" onclick="changeQuestion(1)">Save & Next</button>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">Question Palette</div>
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background:var(--success)"></div> Ans</div>
+                <div class="legend-item"><div class="dot" style="background:white; border:1px solid #ddd"></div> Unread</div>
+                <div class="legend-item"><div class="dot" style="background:var(--warning)"></div> Review</div>
+            </div>
+            <div class="palette-grid" id="palette-container">
+                </div>
+        </div>
+    </div>
+
+    <div id="result-overlay">
+        <div class="score-card">
+            <h2 style="margin:0 0 20px 0; color:var(--dark);">Test Summary</h2>
+            
+            <div class="score-circle" id="score-ring">
+                <div class="score-inner">
+                    <span class="score-big" id="final-score">0</span>
+                    <span class="score-total">/ 60</span>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div style="color:var(--success); font-weight:bold; font-size:1.2rem;" id="correct-count">0</div>
+                    <div style="font-size:0.8rem; color:#666;">Correct</div>
+                </div>
+                <div class="stat-box">
+                    <div style="color:var(--danger); font-weight:bold; font-size:1.2rem;" id="wrong-count">0</div>
+                    <div style="font-size:0.8rem; color:#666;">Wrong</div>
+                </div>
+                <div class="stat-box">
+                    <div style="color:#666; font-weight:bold; font-size:1.2rem;" id="unattempted-count">0</div>
+                    <div style="font-size:0.8rem; color:#666;">Skipped</div>
+                </div>
+                <div class="stat-box">
+                    <div style="color:var(--primary); font-weight:bold; font-size:1.2rem;" id="accuracy-txt">0%</div>
+                    <div style="font-size:0.8rem; color:#666;">Accuracy</div>
+                </div>
+            </div>
+
+            <button class="submit-btn" style="width:100%; margin-top:20px; padding:15px; background:var(--primary);" onclick="startReviewMode()">View Detailed Analysis</button>
+            <button class="submit-btn" style="width:100%; margin-top:10px; padding:15px; background:white; color:var(--dark); border:1px solid #ddd;" onclick="location.href='index.html'">Return to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. REAL KCET BIOLOGY QUESTIONS (60 QUESTIONS) ---
+        const questions = [
+            // Class 11 Diversity & Cell (1-10)
+            { q: "The term 'Systematics' refers to:", o: ["Identification and study of organ systems", "Identification and preservation of plants", "Diversity of kinds of organisms and their relationship", "Study of habitats"], a: 2 },
+            { q: "Which of the following organisms are known as chief producers in the oceans?", o: ["Dinoflagellates", "Diatoms", "Cyanobacteria", "Euglenoids"], a: 1 },
+            { q: "In which of the following animals, digestive tract has additional chambers like crop and gizzard?", o: ["Corvus, Columba, Chameleon", "Bufo, Balaenoptera, Bangarus", "Pavo, Psittacula, Corvus", "Catla, Columba, Crocodilus"], a: 2 },
+            { q: "Which one of the following is not a constituent of cell membrane?", o: ["Glycolipids", "Proline", "Phospholipids", "Cholesterol"], a: 1 },
+            { q: "A non-membrane bound organelle found exclusively in animal cells is:", o: ["Sphaerosome", "Glyoxysome", "Peroxisome", "Centriole"], a: 3 },
+            { q: "The stage during which separation of the paired homologous chromosomes begins is:", o: ["Pachytene", "Diplotene", "Diakinesis", "Zygotene"], a: 1 },
+            { q: "Roots play insignificant role in absorption of water in:", o: ["Pistia", "Pea", "Wheat", "Sunflower"], a: 0 },
+            { q: "Kranz anatomy is one of the characteristics of the leaves of:", o: ["Potato", "Wheat", "Sugarcane", "Mustard"], a: 2 },
+            { q: "Respiratory Quotient (RQ) value of tripalmitin is:", o: ["0.9", "0.7", "0.07", "0.09"], a: 1 },
+            { q: "Which of the following is a stress hormone?", o: ["Ethylene", "GABA", "Abscisic acid", "Cytokinin"], a: 2 },
+
+            // Class 11 Human Physiology (11-20)
+            { q: "The partial pressure of oxygen in the alveoli of the lungs is:", o: ["Equal to that in the blood", "More than that in the blood", "Less than that in the blood", "Less than that of CO2"], a: 1 },
+            { q: "Which of the following cells does not exhibit phagocytic activity?", o: ["Monocytes", "Neutrophils", "Basophils", "Macrophages"], a: 2 },
+            { q: "The part of nephron involved in active reabsorption of sodium is:", o: ["Distal convoluted tubule", "Proximal convoluted tubule", "Bowman's capsule", "Descending limb of Henle's loop"], a: 1 },
+            { q: "Sliding filament theory can be best explained as:", o: ["Actin and Myosin filaments shorten", "Actin filaments slide over Myosin", "Myosin filaments slide over Actin", "Both filaments shorten"], a: 1 },
+            { q: "Glenoid cavity articulates:", o: ["Clavicle with scapula", "Humerus with scapula", "Clavicle with acromion", "Scapula with acromion"], a: 1 },
+            { q: "Which part of the brain is responsible for thermoregulation?", o: ["Medulla oblongata", "Cerebrum", "Hypothalamus", "Corpus callosum"], a: 2 },
+            { q: "Graves' disease is caused due to:", o: ["Hyposecretion of thyroid gland", "Hypersecretion of thyroid gland", "Hyposecretion of adrenal gland", "Hypersecretion of adrenal gland"], a: 1 },
+            { q: "Select the correct statement regarding P-wave.", o: ["Depolarisation of ventricles", "Repolarisation of atria", "Depolarisation of atria", "Repolarisation of ventricles"], a: 2 },
+            { q: "The sphincter of Oddi guards the opening of:", o: ["Hepatopancreatic duct", "Common hepatic duct", "Cystic duct", "Common bile duct"], a: 0 },
+            { q: "Calcium is important in skeletal muscle contraction because it:", o: ["Binds to troponin", "Detaches myosin head", "Activates myosin ATPase", "Prevents formation of bonds"], a: 0 },
+
+            // Class 12 Reproduction (21-30)
+            { q: "Pollination in water hyacinth and water lily is brought about by:", o: ["Water", "Insects or wind", "Birds", "Bats"], a: 1 },
+            { q: "The ovule of an angiosperm is technically equivalent to:", o: ["Megasporangium", "Megasporophyll", "Megaspore mother cell", "Megaspore"], a: 0 },
+            { q: "Which of the following layers in an antral follicle is acellular?", o: ["Stroma", "Zona pellucida", "Granulosa", "Theca interna"], a: 1 },
+            { q: "Capacitation occurs in:", o: ["Epididymis", "Vas deferens", "Female reproductive tract", "Rete testis"], a: 2 },
+            { q: "Which of the following hormones is not secreted by human placenta?", o: ["hCG", "Estrogens", "Progesterone", "LH"], a: 3 },
+            { q: "The function of copper ions in copper releasing IUDs is:", o: ["They inhibit gametogenesis", "They make uterus unsuitable for implantation", "They suppress sperm motility", "They inhibit ovulation"], a: 2 },
+            { q: "Which of the following is hormone releasing IUD?", o: ["LNG-20", "Multiload 375", "Lippes loop", "Cu7"], a: 0 },
+            { q: "Assisted reproductive technology, IVF involves transfer of:", o: ["Ovum into the fallopian tube", "Zygote into the fallopian tube", "Zygote into the uterus", "Embryo with 16 blastomeres into the fallopian tube"], a: 1 },
+            { q: "In human females, meiosis-II is not completed until:", o: ["Uterine implantation", "Birth", "Puberty", "Fertilization"], a: 3 },
+            { q: "Which of the following depicts the correct pathway of transport of sperms?", o: ["Rete testis → Efferent ductules → Epididymis → Vas deferens", "Rete testis → Epididymis → Efferent ductules → Vas deferens", "Rete testis → Vas deferens → Efferent ductules → Epididymis", "Efferent ductules → Rete testis → Vas deferens → Epididymis"], a: 0 },
+
+            // Class 12 Genetics & Evolution (31-45)
+            { q: "A pleiotropic gene:", o: ["Controls a trait only in combination", "Controls multiple traits in an individual", "Is expressed only in primitive plants", "Is a gene evolved during Pliocene"], a: 1 },
+            { q: "In a test cross involving F1 dihybrid flies, more parental-type offspring were produced than the recombinant-type offspring. This indicates:", o: ["The two genes are linked and present on the same chromosome", "Both of the characters are controlled by more than one gene", "The two genes are located on two different chromosomes", "Chromosomes failed to separate during meiosis"], a: 0 },
+            { q: "Which of the following is not a hereditary disease?", o: ["Cystic fibrosis", "Thalassemia", "Haemophilia", "Cretinism"], a: 3 },
+            { q: "The final proof for DNA as the genetic material came from the experiments of:", o: ["Hershey and Chase", "Avery, MacLeod and McCarty", "Hargobind Khorana", "Griffith"], a: 0 },
+            { q: "If there are 999 bases in an RNA that codes for a protein with 333 amino acids, and the base at position 901 is deleted such that the length of the RNA becomes 998 bases, how many codons will be altered?", o: ["11", "33", "333", "1"], a: 1 },
+            { q: "Which of the following rRNAs acts as structural RNA as well as ribozyme in bacteria?", o: ["5S rRNA", "18S rRNA", "23S rRNA", "5.8S rRNA"], a: 2 },
+            { q: "Expressed Sequence Tags (ESTs) refers to:", o: ["Novel DNA sequences", "Genes expressed as RNA", "Polypeptide expression", "DNA polymorphism"], a: 1 },
+            { q: "Analogous structures are a result of:", o: ["Shared ancestry", "Stabilizing selection", "Divergent evolution", "Convergent evolution"], a: 3 },
+            { q: "According to Hugo de Vries, the mechanism of evolution is:", o: ["Multiple step mutations", "Saltation", "Phenotypic variations", "Minor mutations"], a: 1 },
+            { q: "In Hardy-Weinberg equation, the frequency of heterozygous individual is represented by:", o: ["p²", "2pq", "pq", "q²"], a: 1 },
+            { q: "The chronological order of human evolution from early to the recent is:", o: ["Australopithecus → Ramapithecus → Homo habilis → Homo erectus", "Ramapithecus → Australopithecus → Homo habilis → Homo erectus", "Ramapithecus → Homo habilis → Australopithecus → Homo erectus", "Australopithecus → Homo habilis → Ramapithecus → Homo erectus"], a: 1 },
+            { q: "Identify the correct combination of immunoglobulins from the following: Colostrum, Allergy.", o: ["IgA, IgE", "IgM, IgE", "IgG, IgA", "IgA, IgM"], a: 0 },
+            { q: "Which of the following is a commercial blood cholesterol lowering agent?", o: ["Lipases", "Cyclosporin A", "Statin", "Streptokinase"], a: 2 },
+            { q: "MALT constitutes about ___ percent of the lymphoid tissue in human body.", o: ["20%", "70%", "10%", "50%"], a: 3 },
+            { q: "Which part of poppy plant is used to obtain the drug 'Smack'?", o: ["Flowers", "Latex", "Roots", "Leaves"], a: 1 },
+
+            // Class 12 Biotech & Ecology (46-60)
+            { q: "Which of the following restriction enzymes produces blunt ends?", o: ["SalI", "EcoRV", "XhoI", "HindIII"], a: 1 },
+            { q: "The DNA fragments separated on an agarose gel can be visualised after staining with:", o: ["Acetocarmine", "Aniline blue", "Ethidium bromide", "Bromophenol blue"], a: 2 },
+            { q: "A gene whose expression helps to identify transformed cell is known as:", o: ["Vector", "Plasmid", "Structural gene", "Selectable marker"], a: 3 },
+            { q: "Bt cotton variety that was developed by the introduction of toxin gene of Bacillus thuringiensis (Bt) is resistant to:", o: ["Insect pests", "Fungal diseases", "Plant nematodes", "Insect predators"], a: 0 },
+            { q: "The first human hormone produced by recombinant DNA technology is:", o: ["Insulin", "Estrogen", "Thyroxin", "Progesterone"], a: 0 },
+            { q: "Which of the following is not a method of ex situ conservation?", o: ["In vitro fertilization", "Cryopreservation", "Botanical garden", "Sacred groves"], a: 3 },
+            { q: "The Earth Summit held in Rio de Janeiro in 1992 was called for:", o: ["Conservation of Biodiversity and sustainable utilization", "Reduce CO2 emissions", "Reduce CFCs", "Ban on nuclear weapons"], a: 0 },
+            { q: "Which one of the following is not a functional unit of an ecosystem?", o: ["Energy flow", "Decomposition", "Productivity", "Stratification"], a: 3 },
+            { q: "Gause's principle of competitive exclusion states that:", o: ["No two species can occupy the same niche indefinitely", "Larger organisms exclude smaller ones", "More abundant species will exclude the less abundant species", "Competition for the same resources excludes species having different food preferences"], a: 0 },
+            { q: "Which of the following representations shows the pyramid of numbers in a forest ecosystem?", o: ["Upright", "Inverted", "Spindle shaped", "Linear"], a: 0 },
+            { q: "The biomass available for consumption by the herbivores and the decomposers is called:", o: ["Net primary productivity", "Secondary productivity", "Standing crop", "Gross primary productivity"], a: 0 },
+            { q: "World Ozone Day is celebrated on:", o: ["5th June", "21st April", "16th September", "22nd April"], a: 2 },
+            { q: "Which of the following is a secondary pollutant?", o: ["SO2", "CO2", "CO", "O3 (Ozone)"], a: 3 },
+            { q: "Niche is:", o: ["All the biological factors in the organism's environment", "The physical space where an organism lives", "The range of temperature that the organism needs to live", "The functional role played by the organism where it lives"], a: 3 },
+            { q: "Natality refers to:", o: ["Death rate", "Birth rate", "Number of individuals leaving the habitat", "Number of individuals entering a habitat"], a: 1 }
+        ];
+
+        // --- 2. STATE VARIABLES ---
+        let currentQ = 0;
+        let answers = new Array(60).fill(null); // Stores user answers (index)
+        let status = new Array(60).fill(0); // 0:Unread, 1:Visited, 2:Answered, 3:Review
+        let timerTime = 80 * 60; // 80 mins in seconds
+        let timerInterval;
+        let isReviewMode = false;
+
+        // --- 3. INIT ---
+        window.onload = function() {
+            renderPalette();
+            loadQuestion(0);
+            startTimer();
+            status[0] = 1; // Visited first q
+            updatePaletteBtn(0);
+        };
+
+        // --- 4. TIMER ---
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerTime--;
+                let m = Math.floor(timerTime / 60);
+                let s = timerTime % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                
+                if (timerTime <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time's Up! Submitting automatically.");
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        // --- 5. RENDER FUNCTIONS ---
+        function loadQuestion(index) {
+            currentQ = index;
+            document.getElementById('q-num').innerText = index + 1;
+            
+            // Render Text
+            document.getElementById('q-content').innerText = questions[index].q;
+            
+            // Render Options
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            questions[index].o.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                let className = 'option-btn';
+                
+                // Normal Mode Styling
+                if (!isReviewMode) {
+                    if (answers[index] === i) className += ' selected';
+                } 
+                // Review Mode Styling
+                else {
+                    const correctIndex = questions[index].a;
+                    const userIndex = answers[index];
+
+                    if (i === correctIndex) {
+                        className += ' correct-ans';
+                    } else if (i === userIndex) {
+                        className += ' wrong-ans';
+                    }
+                }
+                
+                btn.className = className;
+                btn.innerHTML = `<div class="option-circle"></div> ${opt}`;
+                
+                // Only allow click if NOT in review mode
+                if (!isReviewMode) {
+                    btn.onclick = () => selectOption(i);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            // Update Nav Buttons
+            document.getElementById('prev-btn').disabled = (index === 0);
+            document.getElementById('next-btn').innerText = (index === 59) ? (isReviewMode ? 'Finish Review' : 'Submit') : 'Next';
+            
+            // Update status if unread
+            if(status[index] === 0 && !isReviewMode) status[index] = 1;
+            renderPalette();
+        }
+
+        function renderPalette() {
+            const container = document.getElementById('palette-container');
+            container.innerHTML = '';
+            
+            for(let i=0; i<60; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'p-btn';
+                btn.innerText = i + 1;
+                
+                // Set Color Class
+                if(i === currentQ) btn.classList.add('current');
+                
+                if (isReviewMode) {
+                    // Review Mode
+                    if (answers[i] === questions[i].a) btn.classList.add('p-correct'); // Green
+                    else if (answers[i] !== null) btn.classList.add('p-wrong'); // Red
+                    else btn.classList.add('p-skip'); // Skipped
+                } else {
+                    // Test Mode
+                    if(status[i] === 3) btn.classList.add(answers[i] !== null ? 'review-ans' : 'review');
+                    else if(answers[i] !== null) btn.classList.add('answered');
+                }
+                
+                btn.onclick = () => loadQuestion(i);
+                container.appendChild(btn);
+            }
+        }
+
+        function updatePaletteBtn(index) {
+            renderPalette();
+        }
+
+        // --- 6. INTERACTION ---
+        function selectOption(optIndex) {
+            if(isReviewMode) return;
+            answers[currentQ] = optIndex;
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => b.classList.remove('selected'));
+            btns[optIndex].classList.add('selected');
+        }
+
+        function changeQuestion(dir) {
+            // Save status for current
+            if (!isReviewMode) {
+                if (answers[currentQ] !== null) {
+                    if(status[currentQ] !== 3) status[currentQ] = 2; // Answered
+                } else {
+                    if(status[currentQ] !== 3) status[currentQ] = 1; // Visited
+                }
+            }
+
+            let next = currentQ + dir;
+            if (next >= 0 && next < 60) {
+                loadQuestion(next);
+            } else if (next === 60) {
+                if(isReviewMode) location.href = 'index.html';
+                else submitTest();
+            }
+        }
+
+        function markForReview() {
+            if(isReviewMode) return;
+            status[currentQ] = 3;
+            changeQuestion(1);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            sidebar.classList.toggle('open');
+            if(sidebar.classList.contains('open')) overlay.style.display = 'block';
+            else overlay.style.display = 'none';
+        }
+
+        // --- 7. SUBMISSION & REVIEW ---
+        function submitTest() {
+            clearInterval(timerInterval);
+            let score = 0;
+            let correct = 0;
+            let wrong = 0;
+            let unattempted = 0;
+
+            for(let i=0; i<60; i++) {
+                if(answers[i] === null) {
+                    unattempted++;
+                } else if(answers[i] === questions[i].a) {
+                    score++;
+                    correct++;
+                } else {
+                    wrong++;
+                }
+            }
+
+            // Show Result
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('correct-count').innerText = correct;
+            document.getElementById('wrong-count').innerText = wrong;
+            document.getElementById('unattempted-count').innerText = unattempted;
+            
+            let accuracy = (correct + wrong) > 0 ? Math.round((correct / (correct+wrong)) * 100) : 0;
+            document.getElementById('accuracy-txt').innerText = accuracy + '%';
+
+            // Animate Ring
+            const pct = (score / 60) * 100;
+            document.getElementById('score-ring').style.background = `conic-gradient(var(--success) ${pct}%, #eee 0)`;
+
+            document.getElementById('result-overlay').style.display = 'flex';
+        }
+
+        function startReviewMode() {
+            document.getElementById('result-overlay').style.display = 'none';
+            isReviewMode = true;
+            
+            // UI Changes for Review Mode
+            document.getElementById('submit-btn-top').style.display = 'none';
+            document.getElementById('timer').innerText = "REVIEW";
+            document.getElementById('timer').style.background = "#e2e6ea";
+            document.getElementById('timer').style.color = "#333";
+            document.getElementById('review-btn').style.display = 'none';
+            document.getElementById('mark-badge').style.display = 'none';
+
+            // Reset view to Q1 and render
+            renderPalette();
+            loadQuestion(0);
+        }
+
+    </script>
+</body>
+</html>
