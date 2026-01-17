@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon-192.png">
+    <link rel="manifest" href="/ezikcet/manifest.json">
+    <link rel="icon" href="/ezikcet/icon-192.png">
     <title>KCET Support</title>
     <style>
         body {
@@ -42,12 +42,28 @@
             font-size: 16px;
         }
         button {
-            background-color: #007bff;
-            color: white;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #0056b3;
+        #login-btn, #signup-btn, #send-code-btn, #reset-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        #installBtn {
+            display: none;
+            width: 90%;
+            max-width: 320px;
+            margin: 25px auto;
+            padding: 16px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        }
+        #logout-btn {
+            background-color: #dc3545;
+            color: white;
         }
         .toggle-link {
             text-align: center;
@@ -84,9 +100,16 @@
             color: red;
             margin: 10px 0;
         }
+        .help-text {
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            margin: 10px 0;
+        }
         @media (max-width: 600px) {
             .container {
                 padding: 15px;
+                border-radius: 0;
             }
         }
     </style>
@@ -101,7 +124,7 @@
             <form id="login-form">
                 <input type="email" id="login-email" placeholder="Email" required>
                 <input type="password" id="login-password" placeholder="Password" required>
-                <button type="submit">Login</button>
+                <button type="submit" id="login-btn">Login</button>
             </form>
             <div class="toggle-link" onclick="toggleForms('signup')">Don't have an account? Sign Up</div>
             <div class="toggle-link" onclick="toggleForms('forgot')">Forgot Password?</div>
@@ -119,7 +142,7 @@
                 <select id="signup-stream" required>
                     <option value="">Select Stream</option>
                 </select>
-                <button type="submit">Sign Up</button>
+                <button type="submit" id="signup-btn">Sign Up</button>
             </form>
             <div class="toggle-link" onclick="toggleForms('login')">Already have an account? Login</div>
         </div>
@@ -129,12 +152,12 @@
             <h2>Forgot Password</h2>
             <form id="send-code-form">
                 <input type="email" id="forgot-email" placeholder="Email" required>
-                <button type="submit">Send Reset Code</button>
+                <button type="submit" id="send-code-btn">Send Reset Code</button>
             </form>
             <form id="reset-form" class="hidden">
                 <input type="text" id="reset-code" placeholder="Reset Code" required>
                 <input type="password" id="reset-new-password" placeholder="New Password" required>
-                <button type="submit">Reset Password</button>
+                <button type="submit" id="reset-btn">Reset Password</button>
             </form>
             <div class="toggle-link" onclick="toggleForms('login')">Back to Login</div>
         </div>
@@ -143,16 +166,20 @@
         <div id="dashboard" class="hidden dashboard">
             <h2>Welcome, <span id="user-name"></span></h2>
             <p>City: <span id="user-city"></span> | Stream: <span id="user-stream"></span></p>
-            <button onclick="logout()">Logout</button>
+            <button id="logout-btn" onclick="logout()">Logout</button>
+            
+            <button id="installBtn">Install App (Offline & Faster)</button>
+            <p class="help-text">On iPhone: Tap Share → Add to Home Screen</p>
+            
             <div class="subject-grid">
-                <a href="physics.html" class="subject-link">Physics</a>
-                <a href="physicstest.html" class="subject-link">Physics Test</a>
-                <a href="chemistry.html" class="subject-link">Chemistry</a>
-                <a href="chemistrytest.html" class="subject-link">Chemistry Test</a>
-                <a href="maths.html" class="subject-link">Maths</a>
-                <a href="mathtest.html" class="subject-link">Maths Test</a>
-                <a href="biology.html" class="subject-link">Biology</a>
-                <a href="biologytest.html" class="subject-link">Biology Test</a>
+                <a href="/ezikcet/physics.html" class="subject-link">Physics</a>
+                <a href="/ezikcet/physicstest.html" class="subject-link">Physics Test</a>
+                <a href="/ezikcet/chemistry.html" class="subject-link">Chemistry</a>
+                <a href="/ezikcet/chemistrytest.html" class="subject-link">Chemistry Test</a>
+                <a href="/ezikcet/maths.html" class="subject-link">Maths</a>
+                <a href="/ezikcet/mathtest.html" class="subject-link">Maths Test</a>
+                <a href="/ezikcet/biology.html" class="subject-link">Biology</a>
+                <a href="/ezikcet/biologytest.html" class="subject-link">Biology Test</a>
             </div>
         </div>
         
@@ -161,49 +188,42 @@
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbw9DBHrZ2nKXoafiCAWABk6fBFQDmjCtwrixqoBQZKI9Qtlmv7lULjNmxFfetlIhlBI/exec';
+        const BASE_PATH = '/ezikcet/';
 
         // Toggle forms
         function toggleForms(section) {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('signup-section').classList.add('hidden');
-            document.getElementById('forgot-section').classList.add('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
+            ['login-section', 'signup-section', 'forgot-section', 'dashboard'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
             document.getElementById('reset-form').classList.add('hidden');
             document.getElementById('message').innerText = '';
 
-            if (section === 'login') {
-                document.getElementById('login-section').classList.remove('hidden');
-            } else if (section === 'signup') {
-                document.getElementById('signup-section').classList.remove('hidden');
-            } else if (section === 'forgot') {
-                document.getElementById('forgot-section').classList.remove('hidden');
-            } else if (section === 'dashboard') {
-                document.getElementById('dashboard').classList.remove('hidden');
-            }
+            if (section === 'login') document.getElementById('login-section').classList.remove('hidden');
+            else if (section === 'signup') document.getElementById('signup-section').classList.remove('hidden');
+            else if (section === 'forgot') document.getElementById('forgot-section').classList.remove('hidden');
+            else if (section === 'dashboard') document.getElementById('dashboard').classList.remove('hidden');
         }
 
-        // Show message
         function showMessage(msg, isError = true) {
-            const messageEl = document.getElementById('message');
-            messageEl.innerText = msg;
-            messageEl.style.color = isError ? 'red' : 'green';
+            const el = document.getElementById('message');
+            el.innerText = msg;
+            el.style.color = isError ? 'red' : 'green';
         }
 
-        // Load streams for signup
+        // Load streams
         async function loadStreams() {
             try {
-                const response = await fetch(API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'get_streams' })
                 });
-                const data = await response.json();
+                const data = await res.json();
                 if (data.status === 'success') {
-                    const streamSelect = document.getElementById('signup-stream');
-                    data.streams.forEach(stream => {
-                        const option = document.createElement('option');
-                        option.value = stream;
-                        option.textContent = stream;
-                        streamSelect.appendChild(option);
+                    const select = document.getElementById('signup-stream');
+                    data.streams.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = opt.textContent = s;
+                        select.appendChild(opt);
                     });
                 }
             } catch (err) {
@@ -211,134 +231,150 @@
             }
         }
 
-        // Signup handler
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        // Signup
+        document.getElementById('signup-form').addEventListener('submit', async e => {
             e.preventDefault();
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const phone = document.getElementById('signup-phone').value;
-            const city = document.getElementById('signup-city').value;
-            const stream = document.getElementById('signup-stream').value;
-
+            const data = {
+                action: 'signup',
+                name: document.getElementById('signup-name').value,
+                email: document.getElementById('signup-email').value,
+                password: document.getElementById('signup-password').value,
+                phone: document.getElementById('signup-phone').value,
+                city: document.getElementById('signup-city').value,
+                stream: document.getElementById('signup-stream').value
+            };
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'signup', name, email, password, phone, city, stream })
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+                const result = await res.json();
+                if (result.status === 'success') {
                     showMessage('Signup successful! Please login.', false);
                     toggleForms('login');
                 } else {
-                    showMessage(data.message);
+                    showMessage(result.message);
                 }
-            } catch (err) {
+            } catch {
                 showMessage('Signup failed');
             }
         });
 
-        // Login handler
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async e => {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
+            const data = {
+                action: 'login',
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            };
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'login', email, password })
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    document.getElementById('user-name').innerText = data.user.name;
-                    document.getElementById('user-city').innerText = data.user.city;
-                    document.getElementById('user-stream').innerText = data.user.stream;
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    document.getElementById('user-name').innerText = result.user.name;
+                    document.getElementById('user-city').innerText = result.user.city;
+                    document.getElementById('user-stream').innerText = result.user.stream;
                     toggleForms('dashboard');
                 } else {
-                    showMessage(data.message);
+                    showMessage(result.message);
                 }
-            } catch (err) {
+            } catch {
                 showMessage('Login failed');
             }
         });
 
         // Send reset code
-        document.getElementById('send-code-form').addEventListener('submit', async (e) => {
+        document.getElementById('send-code-form').addEventListener('submit', async e => {
             e.preventDefault();
             const email = document.getElementById('forgot-email').value;
-
             try {
-                const response = await fetch(API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'send_reset_code', email })
                 });
-                const data = await response.json();
+                const data = await res.json();
                 if (data.status === 'success') {
                     showMessage('Code sent! Check your email.', false);
                     document.getElementById('reset-form').classList.remove('hidden');
                 } else {
                     showMessage(data.message);
                 }
-            } catch (err) {
+            } catch {
                 showMessage('Failed to send code');
             }
         });
 
         // Reset password
-        document.getElementById('reset-form').addEventListener('submit', async (e) => {
+        document.getElementById('reset-form').addEventListener('submit', async e => {
             e.preventDefault();
-            const email = document.getElementById('forgot-email').value;
-            const code = document.getElementById('reset-code').value;
-            const newPassword = document.getElementById('reset-new-password').value;
-
+            const data = {
+                action: 'reset_password',
+                email: document.getElementById('forgot-email').value,
+                code: document.getElementById('reset-code').value,
+                newPassword: document.getElementById('reset-new-password').value
+            };
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'reset_password', email, code, newPassword })
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+                const result = await res.json();
+                if (result.status === 'success') {
                     showMessage('Password reset! Please login.', false);
                     toggleForms('login');
                 } else {
-                    showMessage(data.message);
+                    showMessage(result.message);
                 }
-            } catch (err) {
+            } catch {
                 showMessage('Reset failed');
             }
         });
 
-        // Logout
         function logout() {
             localStorage.removeItem('user');
             toggleForms('login');
         }
 
-        // Check if logged in on load
-        const user = localStorage.getItem('user');
-        if (user) {
-            const userData = JSON.parse(user);
-            document.getElementById('user-name').innerText = userData.name;
-            document.getElementById('user-city').innerText = userData.city;
-            document.getElementById('user-stream').innerText = userData.stream;
+        // Check logged in
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const user = JSON.parse(storedUser);
+            document.getElementById('user-name').innerText = user.name;
+            document.getElementById('user-city').innerText = user.city;
+            document.getElementById('user-stream').innerText = user.stream;
             toggleForms('dashboard');
         } else {
             toggleForms('login');
         }
 
-        // Load streams
         loadStreams();
 
-        // Register Service Worker
+        // Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker registered'))
-                    .catch(err => console.log('Service Worker registration failed:', err));
+                navigator.serviceWorker.register('/ezikcet/sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed:', err));
             });
         }
+
+        // Install button logic
+        let installPromptEvent = null;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            installPromptEvent = e;
+            document.getElementById('installBtn').style.display = 'block';
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (!installPromptEvent) return;
+            installPromptEvent.prompt();
+            const { outcome } = await installPromptEvent.userChoice;
+            console.log('Install outcome:', outcome);
+            installPromptEvent = null;
+            document.getElementById('installBtn').style.display = 'none';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('App installed!');
+            document.getElementById('installBtn').style.display = 'none';
+        });
     </script>
 </body>
 </html>
