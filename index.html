@@ -1,222 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EziKCET</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="EziKCET">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EziKCET</title>
 
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
+  <!-- Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#007bff">
 
-    <style>
-        :root { --primary: #007bff; --bg: #ffffff; --text: #222; --radius: 18px; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; min-height: 100vh; color: var(--text); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
-        .app-container { width: 100%; max-width: 460px; padding: 25px; display: flex; flex-direction: column; }
-        
-        /* BRANDING */
-        .brand-header { display: flex; flex-direction: column; align-items: center; margin-top: 40px; margin-bottom: 20px; text-align: center; }
-        .app-logo { width: 110px; height: 110px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,123,255,0.2); margin-bottom: 15px; object-fit: cover; }
-        h1 { margin: 0; font-size: 1.8rem; font-weight: 800; }
-        p { margin: 5px 0 0; color: #666; font-size: 0.9rem; }
+  <!-- Icons -->
+  <link rel="icon" href="./icon.png" type="image/png">
 
-        /* SCREENS */
-        .screen { display: none; flex-direction: column; }
-        .screen.active { display: flex; }
-
-        /* INSTALL SCREEN */
-        #install-screen { 
-            align-items: center; 
-            text-align: center; 
-            margin-top: 20px;
-        }
-        
-        /* THE INSTALL BUTTON */
-        #install-btn {
-            width: 100%; padding: 20px; background: #000; color: #fff;
-            border: none; border-radius: var(--radius); font-size: 1.2rem;
-            font-weight: 700; cursor: pointer; margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-        }
-        
-        #install-btn:active { transform: scale(0.95); }
-
-        /* APP STYLES */
-        input, select { width: 100%; padding: 16px; margin-bottom: 15px; border: 2px solid #e1e1e1; border-radius: 18px; box-sizing: border-box; font-size: 1rem; }
-        .btn { width: 100%; padding: 18px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius); font-size: 1.1rem; font-weight: 700; cursor: pointer; }
-        .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .card-link { background: white; padding: 20px; border-radius: 18px; text-align: center; font-weight: bold; text-decoration: none; color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-
-    </style>
 </head>
 <body>
+  <h1>EziKCET</h1>
+  <p>Progressive Web App is ready!</p>
+  
+  <!-- Install Button -->
+  <button id="install-btn">Install App</button>
 
-    <div class="app-container">
-        
-        <div class="brand-header">
-            <img src="icon.png" alt="Logo" class="app-logo">
-            <h1>EziKCET</h1>
-            <p>KCET support by Ezi Nurse</p>
-        </div>
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
 
-        <div id="install-screen" class="screen">
-            <h2 style="font-size: 1.3rem; margin-bottom: 5px;">App Installation Required</h2>
-            <p style="color: #666; margin: 0;">
-                Click below to install the app on your device.
-            </p>
-            
-            <button id="install-btn">
-                ⬇️ Install App
-            </button>
-        </div>
+    // Install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
 
-        <div id="login-screen" class="screen">
-            <h2>Welcome Back</h2>
-            <form id="login-form">
-                <input type="email" id="login-email" placeholder="Email" required>
-                <input type="password" id="login-password" placeholder="Password" required>
-                <button type="submit" class="btn">Login</button>
-            </form>
-            <p style="text-align:center; margin-top:20px; color:#666;">
-                <span onclick="showScreen('signup-screen')">Create Account</span>
-            </p>
-        </div>
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
+      } else {
+        alert("Installation unavailable. Use Chrome on HTTPS.");
+      }
+    });
 
-        <div id="signup-screen" class="screen">
-            <h2>Create Account</h2>
-            <form id="signup-form">
-                <input type="text" id="reg-name" placeholder="Name" required>
-                <input type="email" id="reg-email" placeholder="Email" required>
-                <input type="password" id="reg-password" placeholder="Password" required>
-                <input type="tel" id="reg-phone" placeholder="Phone" required>
-                <input type="text" id="reg-city" placeholder="City" required>
-                <select id="reg-stream" required>
-                    <option value="">Select Stream</option>
-                    <option>Engineering</option>
-                    <option>Medical</option>
-                </select>
-                <button type="submit" class="btn">Sign Up</button>
-            </form>
-            <p style="text-align:center; margin-top:20px; color:#666;">
-                <span onclick="showScreen('login-screen')">Back to Login</span>
-            </p>
-        </div>
-
-        <div id="home-screen" class="screen">
-            <h2 id="welcome-msg">Hello!</h2>
-            <div class="subject-grid">
-                <a href="physics.html" class="card-link">Physics</a>
-                <a href="chemistry.html" class="card-link">Chemistry</a>
-                <a href="maths.html" class="card-link">Maths</a>
-                <a href="biology.html" class="card-link">Biology</a>
-            </div>
-            <h3 style="margin-top:30px;">Mock Tests</h3>
-            <div class="subject-grid">
-                <a href="physicstest.html" class="card-link" style="border-bottom: 4px solid #ff4757;">Physics Test</a>
-                <a href="chemistrytest.html" class="card-link" style="border-bottom: 4px solid #ff4757;">Chem Test</a>
-                <a href="mathstest.html" class="card-link" style="border-bottom: 4px solid #ff4757;">Maths Test</a>
-                <a href="biologytest.html" class="card-link" style="border-bottom: 4px solid #ff4757;">Bio Test</a>
-            </div>
-            <button onclick="logout()" style="margin-top:40px; background:none; border:none; color:red; width:100%; padding:10px;">Logout</button>
-        </div>
-
-    </div>
-
-    <script>
-        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9DBHrZ2nKXoafiCAWABk6fBFQDmjCtwrixqoBQZKI9Qtlmv7lULjNmxFfetlIhlBI/exec"; 
-
-        // 1. INSTALL LOGIC
-        let deferredPrompt;
-        const installBtn = document.getElementById('install-btn');
-
-        // Initial Check: Are we in App Mode?
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-        if (isStandalone) {
-            checkSession();
-        } else {
-            showScreen('install-screen');
-        }
-
-        // Capture the Event (Required for the button to work)
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome from automatically showing the prompt (we want to show it on click)
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        // Listen for successful install to switch screens
-        window.addEventListener('appinstalled', () => {
-            deferredPrompt = null;
-            checkSession();
-        });
-
-        // HANDLE CLICK
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                // If browser is ready, fire the native prompt
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response: ${outcome}`);
-                deferredPrompt = null;
-            } else {
-                // FALLBACK: If the browser refuses to fire the event
-                // This usually means:
-                // 1. Not HTTPS
-                // 2. Not Chrome/Edge (Firefox/Safari don't support install buttons)
-                // 3. Already installed
-                alert("Installation Unavailable.\n\nPlease ensure you are using Google Chrome or Edge on a secure (https) connection.");
-            }
-        });
-
-        // 2. APP LOGIC
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        async function apiCall(data) {
-            try {
-                const res = await fetch(APP_SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
-                return await res.json();
-            } catch (e) { alert("Connection Error"); return {status:"error"}; }
-        }
-
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const res = await apiCall({ action: "login", email: document.getElementById('login-email').value, password: document.getElementById('login-password').value });
-            if(res.status === "success") { localStorage.setItem('user', JSON.stringify(res.user)); loadHome(res.user); } 
-            else { alert(res.message); }
-        });
-
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                action: "signup",
-                name: document.getElementById('reg-name').value,
-                email: document.getElementById('reg-email').value,
-                password: document.getElementById('reg-password').value,
-                phone: document.getElementById('reg-phone').value,
-                city: document.getElementById('reg-city').value,
-                stream: document.getElementById('reg-stream').value
-            };
-            const res = await apiCall(data);
-            if(res.status === "success") { localStorage.setItem('user', JSON.stringify(data)); loadHome(data); } 
-            else { alert(res.message); }
-        });
-
-        function loadHome(user) { document.getElementById('welcome-msg').innerText = "Hello, " + user.name; showScreen('home-screen'); }
-        function checkSession() { const user = JSON.parse(localStorage.getItem('user')); if(user) loadHome(user); else showScreen('login-screen'); }
-        function logout() { localStorage.removeItem('user'); showScreen('login-screen'); }
-
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-    </script>
+    // Service Worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .then(() => console.log('SW registered'));
+    }
+  </script>
 </body>
 </html>
